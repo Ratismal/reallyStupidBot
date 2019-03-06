@@ -1,0 +1,21 @@
+{
+	"name": "reallystupidbot",
+	"version": "1.0.0",
+	"description": "A bot for stupid cat's Twitch channel.",
+	"main": "index.js",
+	"repository": "https://github.com/Ratismal/reallyStupidBot",
+	"author": "stupid cat",
+	"license": "MIT",
+	"private": false,
+	"dependencies": {
+		"@ayana/bento": "^1.0.0-beta.1",
+		"cat-loggr": "^1.0.17",
+		"catflake": "^1.0.0",
+		"eris": "^0.9.0"
+	},
+	"devDependencies": {
+		"@types/node": "^11.10.4",
+		"tslint": "^5.13.1",
+		"typescript": "^3.3.3333"
+	}
+}
