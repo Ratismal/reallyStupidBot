@@ -1,5 +1,5 @@
 Arguments: 
-  /home/cat/.nvm/versions/node/v10.9.0/bin/node /home/cat/.nvm/versions/node/v10.9.0/bin/yarn add @blargbot/tsconfig-config-blargbot
+  /home/cat/.nvm/versions/node/v10.9.0/bin/node /home/cat/.nvm/versions/node/v10.9.0/bin/yarn add koa
 
 PATH: 
   /home/cat/.nvm/versions/node/v10.9.0/bin:/home/cat/.cargo/bin:/usr/local/sbin:/usr/local/bin:/usr/bin:/var/lib/flatpak/exports/bin:/usr/lib/jvm/default/bin:/usr/lib/oracle/product/11.2.0/xe/bin:/usr/bin/site_perl:/usr/bin/vendor_perl:/usr/bin/core_perl
@@ -14,17 +14,8 @@ Platform:
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@blargbot%2ftsconfig-config-blargbot: Not found
-      at Request.params.callback [as _callback] (/home/cat/.nvm/versions/node/v10.9.0/lib/node_modules/yarn/lib/cli.js:61073:18)
-      at Request.self.callback (/home/cat/.nvm/versions/node/v10.9.0/lib/node_modules/yarn/lib/cli.js:120166:22)
-      at Request.emit (events.js:182:13)
-      at Request.<anonymous> (/home/cat/.nvm/versions/node/v10.9.0/lib/node_modules/yarn/lib/cli.js:121138:10)
-      at Request.emit (events.js:182:13)
-      at IncomingMessage.<anonymous> (/home/cat/.nvm/versions/node/v10.9.0/lib/node_modules/yarn/lib/cli.js:121060:12)
-      at Object.onceWrapper (events.js:273:13)
-      at IncomingMessage.emit (events.js:187:15)
-      at endReadableNT (_stream_readable.js:1085:12)
-      at process._tickCallback (internal/process/next_tick.js:63:19)
+  Error: getaddrinfo EAI_AGAIN registry.yarnpkg.com registry.yarnpkg.com:443
+      at GetAddrInfoReqWrap.onlookup [as oncomplete] (dns.js:57:26)
 
 npm manifest: 
   {
@@ -59,6 +50,9 @@ npm manifest:
   		"twitch-pubsub-client": "^1.1.0"
   	},
   	"devDependencies": {
+  		"@blargbot/eslint-config-blargbot": "^1.0.1",
+  		"@blargbot/eslint-config-blargbot-vue": "^1.0.0",
+  		"@blargbot/tslint-config-blargbot": "^1.0.0",
   		"@types/node": "^11.10.4",
   		"tslint": "^5.13.1",
   		"typescript": "^3.3.3333"
@@ -755,6 +749,21 @@ Lockfile:
       esutils "^2.0.2"
       lodash "^4.17.11"
       to-fast-properties "^2.0.0"
+  
+  "@blargbot/eslint-config-blargbot-vue@^1.0.0":
+    version "1.0.0"
+    resolved "https://registry.yarnpkg.com/@blargbot/eslint-config-blargbot-vue/-/eslint-config-blargbot-vue-1.0.0.tgz#bb0e240dee47a9c050c8a0b67f279f4384e7a466"
+    integrity sha512-LqzLCdfJdWKS1LLBHls8C0xLf2BkhNgB8QSrTBXgaQBjnb64D929dbIWgEO4Pxb5NMtAiTix8i4SheQYsFllKg==
+  
+  "@blargbot/eslint-config-blargbot@^1.0.1":
+    version "1.0.1"
+    resolved "https://registry.yarnpkg.com/@blargbot/eslint-config-blargbot/-/eslint-config-blargbot-1.0.1.tgz#e7fd028d866b198232b264ddddb6262386bf3119"
+    integrity sha512-9abVW7impfm3YhflPv74jaIc5k/stRla8AWOcn9gqbpzfAa7jYeA2nNtgHxBVmRmkeBLhzGI/DO/zLeegJ6h2w==
+  
+  "@blargbot/tslint-config-blargbot@^1.0.0":
+    version "1.0.0"
+    resolved "https://registry.yarnpkg.com/@blargbot/tslint-config-blargbot/-/tslint-config-blargbot-1.0.0.tgz#c59f1ec3f9c4b4f6d8ff66c8585e47623f4471f6"
+    integrity sha512-zPUzIh+LHaqoBlmSFEG1lLHfQdoD+oJ+NCgtlL6JmBBT0umHoGVGWbJkLeCopUUlBvWWT9mIHYU7VWF5rUs/zg==
   
   "@csstools/convert-colors@^1.4.0":
     version "1.4.0"
