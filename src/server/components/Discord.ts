@@ -10,7 +10,7 @@ import {
 
 import { DiscordEvent } from '../Constants';
 
-import Loggr from '../loggr';
+import Loggr from 'loggr';
 const console = Loggr.get('Discord');
 
 export class Discord {

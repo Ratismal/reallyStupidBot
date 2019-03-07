@@ -6,12 +6,12 @@ import {
 	VariableDefinitionType,
 } from '@ayana/bento';
 
-import Loggr from '../loggr';
+import Loggr from 'loggr';
 const console = Loggr.get('Server');
-import { Twitch } from '@internal/components/Twitch';
-import Koa from 'koa';
-import Router from 'koa-router';
-import bodyParser from 'koa-bodyparser';
+import { Twitch } from './Twitch';
+import * as Koa from 'koa';
+import * as Router from 'koa-router';
+import * as bodyParser from 'koa-bodyparser';
 
 export class Server {
 	public api: ComponentAPI;

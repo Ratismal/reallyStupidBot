@@ -1,6 +1,6 @@
 import { Bento, FSComponentLoader } from '@ayana/bento';
 
-import Loggr from './loggr';
+import Loggr from 'loggr';
 const console = Loggr.get('Root');
 
 import * as plugins from './plugins';

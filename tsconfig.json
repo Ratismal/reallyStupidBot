@@ -23,7 +23,13 @@
 		"disableSizeLimit": true,
 		// "allowJs": true,
 		"experimentalDecorators": true,
-		"resolveJsonModule": true
+		"resolveJsonModule": true,
+		"baseUrl": ".",
+		"paths": {
+			"loggr": [
+				"src/loggr"
+			]
+		}
 	},
 	"include": [
 		"./src"

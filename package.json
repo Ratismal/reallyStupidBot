@@ -11,12 +11,11 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"sequelize": "sequelize",
 		"build": "rm -rf dist/ && tsc",
-		"start": "npm run build && node dist/index.js"
+		"start": "npm run build && node dist/index.js",
+		"dev": "cross-env NODE_ENV=\"DEV\" npm run build && node dist/index.js"
 	},
 	"dependencies": {
 		"@ayana/bento": "^1.0.0-beta.1",
-		"@internal/components": "file:./src/server/components",
-		"@internal/plugins": "file:./src/server/plugins",
 		"@types/koa": "^2.0.48",
 		"@types/koa-bodyparser": "^4.2.2",
 		"@types/koa-router": "^7.0.40",
@@ -40,6 +39,7 @@
 		"@blargbot/eslint-config-blargbot-vue": "^1.0.0",
 		"@blargbot/tslint-config-blargbot": "^1.0.0",
 		"@types/node": "^11.10.4",
+		"cross-env": "^5.2.0",
 		"tslint": "^5.13.1",
 		"typescript": "^3.3.3333"
 	}
