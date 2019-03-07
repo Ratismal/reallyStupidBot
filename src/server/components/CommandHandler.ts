@@ -28,8 +28,6 @@ export class CommandHandler {
 
 	@Variable({ type: VariableDefinitionType.STRING, name: 'prefix' })
 	private prefix: string;
-	@Variable({ type: VariableDefinitionType.STRING, name: 'suffix' })
-	private suffix: string;
 
 	public async onLoad() {
 		console.init('Loading commands...');
