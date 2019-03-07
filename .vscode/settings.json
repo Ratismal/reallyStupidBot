@@ -1,5 +1,14 @@
 {
-  "editor.detectIndentation": false,
-  "editor.insertSpaces": false,
-  "editor.tabSize": 2
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": false,
+	"editor.tabSize": 2,
+	"eslint.enable": true,
+	"eslint.validate": [
+		"javascript",
+		{
+			"autoFix": true,
+			"language": "vue"
+		}
+	],
+	"tslint.autoFixOnSave": true
 }
