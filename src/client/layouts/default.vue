@@ -1,7 +1,11 @@
 <template>
 	<div class='nuxt-wrapper'>
-		<header>super cool header</header>
-		<nuxt/>
+		<header>
+			<section>
+				<h1>really stupid bot</h1>
+			</section>
+		</header>
+		<nuxt class='main'/>
 	</div>
 </template>
 

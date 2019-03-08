@@ -1,15 +1,14 @@
 <template>
 	<main>
-		<section>
-			<h1>super cool page</h1>
-			<p>for super cool stuff</p>
-		</section>
+		aaaaaaaaaaaaa
 	</main>
 </template>
 
 <script>
 export default {
 	mounted() {
+		if (process.client) {
+		}
 	},
 };
 </script>

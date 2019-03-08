@@ -7,7 +7,7 @@ import {
 	VariableDefinitionType,
 } from '@ayana/bento';
 
-import Loggr from 'loggr';
+import Loggr from '$loggr';
 const console = Loggr.get('Twitch');
 
 export class Twitch {

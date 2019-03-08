@@ -1,6 +1,6 @@
 import db from '../../data/models';
 
-import Loggr from 'loggr';
+import Loggr from '$loggr';
 const console = Loggr.get('Database');
 
 export class Database {

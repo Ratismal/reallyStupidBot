@@ -12,7 +12,20 @@ module.exports = {
 					exclude: /(node_modules)/,
 				});
 			}
+
+			let plugin = config.plugins.find(p => {
+				return p.constructor.name === 'WebpackBarPlugin';
+			});
+			let p = -1, m = 0;;
+			plugin.handler = function (percent, msg) {
+					percent = Math.floor(percent * 100);
+					if (percent !== p && percent % 50 === 0) {
+							(console.nuxt || console.log)(`Compiling ${isClient ? 'client' : 'server'}: ${percent}%`, msg);
+							p = percent;
+					}
+			};
 		},
+		// quiet: true,
 		postcss: {
 			plugins: {
 				'postcss-custom-properties': false,

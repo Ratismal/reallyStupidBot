@@ -12,7 +12,7 @@
 		"sequelize": "sequelize",
 		"build": "rm -rf dist/ && tsc",
 		"start": "npm run build && node dist/index.js",
-		"dev": "cross-env NODE_ENV=\"DEV\" npm run build && node dist/index.js"
+		"dev": "npm run build && cross-env NODE_ENV=DEV node dist/index.js"
 	},
 	"dependencies": {
 		"@ayana/bento": "^1.0.0-beta.1",
@@ -26,6 +26,7 @@
 		"koa": "^2.6.2",
 		"koa-bodyparser": "^4.2.1",
 		"koa-router": "^7.4.0",
+		"module-alias": "^2.2.0",
 		"nuxt": "^2.4.5",
 		"pg": "^7.8.2",
 		"sequelize": "^4.43.0",
@@ -39,8 +40,21 @@
 		"@blargbot/eslint-config-blargbot-vue": "^1.0.0",
 		"@blargbot/tslint-config-blargbot": "^1.0.0",
 		"@types/node": "^11.10.4",
+		"babel-eslint": "^10.0.1",
 		"cross-env": "^5.2.0",
+		"eslint": "^5.15.1",
+		"eslint-loader": "^2.1.2",
+		"eslint-plugin-vue": "^5.2.2",
+		"node-sass": "^4.11.0",
+		"sass-lint": "^1.12.1",
+		"sass-loader": "^7.1.0",
 		"tslint": "^5.13.1",
 		"typescript": "^3.3.3333"
+	},
+	"_moduleAliases": {
+		"$loggr": "dist/loggr",
+		"$plugins": "dist/server/plugins",
+		"$components": "dist/server/components",
+		"$root": "dist"
 	}
 }

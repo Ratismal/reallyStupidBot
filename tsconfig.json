@@ -26,9 +26,12 @@
 		"resolveJsonModule": true,
 		"baseUrl": ".",
 		"paths": {
-			"loggr": [
+			"$loggr": [
 				"src/loggr"
-			]
+			],
+			"$plugins": ["src/server/plugins"],
+			"$components": ["src/server/components"],
+			"$root": ["src"]
 		}
 	},
 	"include": [
