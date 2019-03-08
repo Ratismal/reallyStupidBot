@@ -13,14 +13,21 @@ import * as Koa from 'koa';
 import * as Router from 'koa-router';
 import * as bodyParser from 'koa-bodyparser';
 
+import TwitchClient from 'twitch';
+
+const snekfetch = require('snekfetch');
+
 const nuxtConf: any = require('$root/../nuxt.config.js');
 const { Nuxt, Builder } = require('nuxt');
+
+import { Database } from '$plugins';
 
 export class Server {
 	public api: ComponentAPI;
 	public name: string = 'Server';
 
 	public dependencies: Component[] = [Twitch];
+	public plugins: Component[] = [Database];
 
 	private app: Koa;
 	private router: Router;
@@ -63,7 +70,8 @@ export class Server {
 			return await next();
 		});
 
-		this.router.get('/discord/auth')
+		this.router.post('/discord/auth', this.discordLogin.bind(this));
+		this.router.post('/twitch/auth', this.twitchLogin.bind(this));
 		this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
 		this.app.listen(3005);
@@ -71,6 +79,26 @@ export class Server {
 
 	async discordLogin(ctx: any, next: any) {
 
+	}
+
+	async twitchLogin(ctx: any, next: any) {
+		const body = ctx.request.body;
+		let res = await snekfetch.post(`https://id.twitch.tv/oauth2/token?client_id=${this.config.twitch.clientId}&client_secret=${this.config.twitch.clientSecret}&code=${body.code}&grant_type=authorization_code&redirect_uri=${this.config.origin}/twitch/login`);
+		console.log(res.body);
+
+		const client = TwitchClient.withCredentials(this.config.twitch.clientId, res.body.access_token);
+		const user = await client.users.getMe();
+
+		const db = this.api.getPlugin<Database>(Database);
+
+		await db.auth.upsert({
+			id: user.id,
+			name: user.name,
+			accessToken: res.body.access_token,
+			refreshToken: res.body.refresh_token
+		});
+
+		ctx.status = 200;
 	}
 
 	public async onUnload() {

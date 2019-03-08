@@ -1,4 +1,5 @@
 import TwitchClient from 'twitch';
+import ChatClient from 'twitch-chat-client';
 
 import {
 	ComponentAPI,
@@ -16,6 +17,9 @@ export class Twitch {
 
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
+
+	private cclient: ChatClient;
+	private client: TwitchClient;
 
 	public async onLoad() {
 	}

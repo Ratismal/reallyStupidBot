@@ -9,7 +9,9 @@ export class Database {
 	[key: string]: any;
 
 	public async onLoad() {
+		// console.log(db);
 		for (const key in db) {
+			console.log('Loading', key);
 			if (db[key]) {
 				this[key] = db[key];
 			}

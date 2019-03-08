@@ -1,3 +1,5 @@
+const config = require('./config.json');
+
 module.exports = {
 	head: { title: 'Really Stupid Bot' }, // Headers of the page
 	srcDir: 'src/client',
@@ -37,4 +39,14 @@ module.exports = {
 	css: [
 		'@/assets/scss/base.scss',
 	],
+	modules: [
+		['@nuxtjs/axios', {
+				prefix: '/api',
+				proxy: true,
+				port: 8067,
+		}],
+	],
+	proxy: {
+		'/api/': config.origin || 'http://localhost:3005',
+	},
 };
