@@ -6,10 +6,10 @@ module.exports = (sequelize: any, DataTypes: any) => {
 			primaryKey: true,
 		},
 		name: DataTypes.STRING,
-		access_token: DataTypes.STRING,
-		refresh_token: DataTypes.STRING,
+		accessToken: DataTypes.STRING,
+		refreshToken: DataTypes.STRING,
 	}, {});
-	auth.associate = function(models: any) {
+	auth.associate = function (models: any) {
 		// associations can be defined here
 	};
 	return auth;

@@ -7,6 +7,8 @@ import * as plugins from './plugins';
 const bento = new Bento();
 const config = require('../../config.json');
 
+export * from './Constants';
+
 export default async function start() {
 	console.init('Initializing...');
 	bento.setVariable('_config', config);
@@ -22,7 +24,7 @@ export default async function start() {
 	const _plugins = Object.values(plugins).map(p => new p());
 
 	console.init('Adding plugins...');
-	await bento.addPlugins([fsloader, ..._plugins]);
+	await bento.addPlugins([..._plugins, fsloader]);
 	console.init('Verifying...');
 	await bento.verify();
 	console.init('Done!');

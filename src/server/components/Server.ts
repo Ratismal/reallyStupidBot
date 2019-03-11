@@ -3,6 +3,7 @@ import {
 	SubscribeEvent,
 	Variable,
 	Component,
+	Plugin,
 	VariableDefinitionType,
 } from '@ayana/bento';
 
@@ -27,18 +28,24 @@ export class Server {
 	public name: string = 'Server';
 
 	public dependencies: Component[] = [Twitch];
-	public plugins: Component[] = [Database];
+	public plugins: Plugin[] = [Database];
 
 	private app: Koa;
 	private router: Router;
 	private nuxt: any;
 
+	private Twitch: Twitch;
+	private db: Database;
+
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
 
 	public async onLoad() {
+		this.Twitch = this.api.getComponent<Twitch>(Twitch);
+		this.db = this.api.getPlugin<Database>(Database);
+
 		this.app = new Koa();
-		this.router = new Router({prefix: '/api'});
+		this.router = new Router({ prefix: '/api' });
 
 		this.app.use(bodyParser());
 
@@ -63,7 +70,7 @@ export class Server {
 
 					this.nuxt.render(ctx.req, ctx.res, (p: Promise<void>) => p.then(() => res()).catch(err => {
 						console.log(err);
-						rej()
+						rej();
 					}));
 				}));
 			}
@@ -89,14 +96,16 @@ export class Server {
 		const client = TwitchClient.withCredentials(this.config.twitch.clientId, res.body.access_token);
 		const user = await client.users.getMe();
 
-		const db = this.api.getPlugin<Database>(Database);
-
-		await db.auth.upsert({
+		await this.db.auth.upsert({
 			id: user.id,
 			name: user.name,
 			accessToken: res.body.access_token,
-			refreshToken: res.body.refresh_token
+			refreshToken: res.body.refresh_token,
 		});
+
+		if (user.id === this.config.twitch.myId) {
+			await this.Twitch.login();
+		}
 
 		ctx.status = 200;
 	}

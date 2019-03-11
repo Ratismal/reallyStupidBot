@@ -1,9 +1,13 @@
 import db from '../../data/models';
 
+import {
+	Plugin,
+} from '@ayana/bento';
+
 import Loggr from '$loggr';
 const console = Loggr.get('Database');
 
-export class Database {
+export class Database implements Plugin {
 	name: string = 'Database';
 
 	[key: string]: any;

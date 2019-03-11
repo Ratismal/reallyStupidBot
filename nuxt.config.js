@@ -20,11 +20,11 @@ module.exports = {
 			});
 			let p = -1, m = 0;;
 			plugin.handler = function (percent, msg) {
-					percent = Math.floor(percent * 100);
-					if (percent !== p && percent % 50 === 0) {
-							(console.nuxt || console.log)(`Compiling ${isClient ? 'client' : 'server'}: ${percent}%`, msg);
-							p = percent;
-					}
+				percent = Math.floor(percent * 100);
+				if (percent !== p && percent % 50 === 0) {
+					(console.nuxt || console.log)(`Compiling ${isClient ? 'client' : 'server'}: ${percent}%`, msg);
+					p = percent;
+				}
 			};
 		},
 		// quiet: true,
@@ -34,6 +34,10 @@ module.exports = {
 			},
 		},
 	},
+	env: {
+		origin: config.origin,
+		clientId: config.twitch.clientId,
+	},
 	plugins: [],
 	dev: process.env.NODE_ENV === 'DEV',
 	css: [
@@ -41,9 +45,9 @@ module.exports = {
 	],
 	modules: [
 		['@nuxtjs/axios', {
-				prefix: '/api',
-				proxy: true,
-				port: 8067,
+			prefix: '/api',
+			proxy: true,
+			port: 8067,
 		}],
 	],
 	proxy: {

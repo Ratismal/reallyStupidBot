@@ -57,6 +57,7 @@
 		"$loggr": "dist/loggr",
 		"$plugins": "dist/server/plugins",
 		"$components": "dist/server/components",
-		"$root": "dist"
+		"$root": "dist",
+		"$server": "dist/server"
 	}
 }

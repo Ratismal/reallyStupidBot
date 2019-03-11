@@ -29,9 +29,18 @@
 			"$loggr": [
 				"src/loggr"
 			],
-			"$plugins": ["src/server/plugins"],
-			"$components": ["src/server/components"],
-			"$root": ["src"]
+			"$plugins": [
+				"src/server/plugins"
+			],
+			"$components": [
+				"src/server/components"
+			],
+			"$root": [
+				"src"
+			],
+			"$server": [
+				"src/server"
+			]
 		}
 	},
 	"include": [
