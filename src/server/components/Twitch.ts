@@ -27,8 +27,8 @@ export class Twitch {
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
 
-	private cclient: ChatClient;
-	private client: TwitchClient;
+	public cclient: ChatClient;
+	public client: TwitchClient;
 	private eventHandler: EventEmitter;
 
 	public events: { [key: string]: any };
@@ -72,7 +72,7 @@ export class Twitch {
 				console.init('Logged in as', user.displayName);
 
 				console.init('Loading chat...');
-				this.cclient = await ChatClient.forTwitchClient(this.client);
+				this.cclient = new ChatClient('reallystupidbot', this.config.twitch.chatToken, this.client);
 				console.init('Loading events...');
 				await this.registerEvents();
 
