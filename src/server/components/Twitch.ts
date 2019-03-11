@@ -13,6 +13,9 @@ import {
 
 import Loggr from '$loggr';
 import { EventEmitter } from 'events';
+
+import { CronJob } from 'cron';
+
 // import { EventEmitter } from 'events';
 const console = Loggr.get('Twitch');
 
@@ -33,6 +36,9 @@ export class Twitch {
 
 	public events: { [key: string]: any };
 
+	private cron: CronJob;
+	private isLive: boolean = false;
+
 	public async onLoad() {
 		this.db = this.api.getPlugin<Database>(Database);
 		this.events = {};
@@ -42,6 +48,20 @@ export class Twitch {
 		this.api.forwardEvents(this.eventHandler, Object.values(TwitchChatEvent));
 
 		await this.login();
+
+		this.cron = new CronJob('* * * * *', this.cronInterval.bind(this));
+	}
+
+	public async cronInterval() {
+		const live = await this.isStreamLive();
+		if (live === null) return;
+		if (live && !this.isLive) {
+			this.isLive = true;
+			this.eventHandler.emit('STREAM_UP');
+		} else if (!live && this.isLive) {
+			this.isLive = false;
+			this.eventHandler.emit('STREAM_DOWN');
+		}
 	}
 
 	public async onUnload() {
@@ -83,6 +103,11 @@ export class Twitch {
 				await this.chatClient.waitForRegistration();
 				console.init('Joining channel...');
 				await this.chatClient.join(user.displayName);
+
+				// First ping, don't perform announcement
+				if (await this.isStreamLive()) {
+					this.isLive = true;
+				} else this.isLive = false;
 			} else {
 				console.error('No authentication was found.');
 			}
@@ -114,6 +139,22 @@ export class Twitch {
 	@SubscribeEvent(Twitch, TwitchChatEvent.NOTICE)
 	async handleNotice(...args: any[]) {
 		console.log(args);
+	}
+
+	async isStreamLive() {
+		if (this.client) {
+			return !!(await this.client.streams.getStreamByChannel(this.config.twitch.myId));
+		} else return null;
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_UP)
+	async handleStreamUp() {
+		console.info('Stream is now live.');
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_DOWN)
+	async handleStreamDown() {
+		console.info('Stream is no longer live.');
 	}
 
 }
