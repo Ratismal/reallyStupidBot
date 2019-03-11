@@ -4,19 +4,21 @@ import { TwitchCommands } from '../Commands';
 import { Command, CommandContext } from '../interfaces';
 
 import Loggr from '$loggr';
-const console = Loggr.get('TC: Ping');
+const console = Loggr.get('TC: Echo');
 
-export class Ping implements Command {
+export class Echo implements Command {
 	public api: ComponentAPI;
-	public name: string = 'Ping';
+	public name: string = 'Echo';
 
 	public parent: Component = TwitchCommands;
 
-	public command: string = 'ping';
+	public command: string = 'echo';
 
-	public description: string = 'pong!';
+	public aliases: string[] = ['say'];
+
+	public description: string = 'repeats what you said';
 
 	public async execute(ctx: CommandContext) {
-		return 'Pong!';
+		return '\u200b' + ctx.args.join(' ');
 	}
 }

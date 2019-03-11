@@ -27,7 +27,7 @@ export class Twitch {
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
 
-	public cclient: ChatClient;
+	public chatClient: ChatClient;
 	public client: TwitchClient;
 	private eventHandler: EventEmitter;
 
@@ -72,17 +72,17 @@ export class Twitch {
 				console.init('Logged in as', user.displayName);
 
 				console.init('Loading chat...');
-				this.cclient = new ChatClient('reallystupidbot', this.config.twitch.chatToken, this.client);
+				this.chatClient = new ChatClient('reallystupidbot', this.config.twitch.chatToken, this.client);
 				console.init('Loading events...');
 				await this.registerEvents();
 
 				// this.api.forwardEvents(this.cclient, Object.values(this.events));
 				console.init('Connecting...');
-				await this.cclient.connect();
+				await this.chatClient.connect();
 				console.init('Waiting for registration...');
-				await this.cclient.waitForRegistration();
+				await this.chatClient.waitForRegistration();
 				console.init('Joining channel...');
-				await this.cclient.join(user.displayName);
+				await this.chatClient.join(user.displayName);
 			} else {
 				console.error('No authentication was found.');
 			}
@@ -94,14 +94,14 @@ export class Twitch {
 
 	private async registerEvents() {
 		this.events = {};
-		for (const key in this.cclient) {
+		for (const key in this.chatClient) {
 			if (key.startsWith('on')) {
 				let eventName = key.substring(2);
 				if (eventName.length > 0) {
 					// SNAKE_CASE event names
 					eventName = eventName.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
-					this.events[eventName] = (this.cclient as any)[key];
-					const handler = (this.cclient as any)[key]((...args: any[]) => {
+					this.events[eventName] = (this.chatClient as any)[key];
+					const handler = (this.chatClient as any)[key]((...args: any[]) => {
 						this.eventHandler.emit(eventName, ...args);
 					});
 					// this.eventHandler.on(eventName);

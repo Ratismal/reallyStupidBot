@@ -25,7 +25,7 @@ export class TwitchCommands {
 	public plugins: Plugin[] = [Database];
 
 	private prefix: string;
-	private commands: Map<string, Command> = new Map();
+	public commands: Map<string, Command> = new Map();
 	private db: Database;
 	private Twitch: Twitch;
 
@@ -63,11 +63,24 @@ export class TwitchCommands {
 
 		console.init('Registered command', command.name);
 		this.commands.set(command.command, command);
+
+		if (command.aliases) {
+			for (const alias of command.aliases) {
+				if (this.commands.has(alias)) throw new Error('Command alias already exists');
+				this.commands.set(alias, command);
+			}
+		}
 	}
 
 	public async removeCommand(command: Command) {
 		if (this.commands.has(command.command)) {
 			this.commands.delete(command.command);
+
+			if (command.aliases) {
+				for (const alias of command.aliases) {
+					if (this.commands.has(alias)) this.commands.delete(alias);
+				}
+			}
 		}
 	}
 
@@ -83,7 +96,7 @@ export class TwitchCommands {
 				user,
 				content: message,
 				msg,
-				client: this.Twitch.cclient,
+				client: this.Twitch.chatClient,
 				text,
 				args,
 			};
