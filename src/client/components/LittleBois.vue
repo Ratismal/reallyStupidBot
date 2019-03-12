@@ -212,11 +212,17 @@ export default {
 	},
 	methods: {
 		userJoin({ name, color }) {
-			this.users.push(new User(name, color));
-		},
-		userMessage({ name, text }) {
 			let user = this.users.find(u => u.name === name);
-			if (user) user.addMessage(text);
+			if (!user) {
+				user = new User(name, color);
+				this.users.push(user);
+			}
+			return user;
+		},
+		userMessage({ name, text, color }) {
+			let user = this.users.find(u => u.name === name);
+			if (!user) user = this.userJoin({ name, color });
+			user.addMessage(text);
 		},
 		userLeave({ name }) {
 			let user = this.users.find(u => u.name === name);

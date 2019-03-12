@@ -224,6 +224,7 @@ export class Server {
 			code: 'MESSAGE',
 			name: user,
 			text: message,
+			color: msg.userInfo.color,
 		});
 	}
 
