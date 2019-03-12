@@ -10,7 +10,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"sequelize": "sequelize",
-		"build": "rm -rf dist/ && tsc",
+		"build": "rm -rf dist/ && tsc && nuxt build",
 		"start": "npm run build && node dist/index.js",
 		"dev": "npm run build && cross-env NODE_ENV=DEV node dist/index.js"
 	},
