@@ -13,22 +13,26 @@ html, body, #__nuxt, #__layout, .nuxt-wrapper {
 	height: 100%;
 }
 
+.main {
+}
+
 .nuxt-wrapper {
 	display: flex;
 	flex-direction: column;
-	background: rgba(0, 0, 0, 0.9);
+	// background: rgba(0, 0, 0, 0.9);
 	color: rgba(255, 255, 255, 0.95);
 	font-family: sans-serif;
 
 	header {
 		flex: 0 0 auto;
 		height: 75px;
-		background: rgba(0, 0, 0, 0.3);
+		background: rgba(0, 0, 0, 0.95);
 		padding: 1rem;
 	}
 
 	.main {
 		flex: 1 1 auto;
+		background: rgba(0, 0, 0, 0.9);
 	}
 }
 
