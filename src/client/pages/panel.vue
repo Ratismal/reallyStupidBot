@@ -1,15 +1,20 @@
 <template>
 	<main class='container'>
 		<user-greeter class='user-greeter'/>
+		<little-bois class='littlebois'/>
 	</main>
 </template>
 
 <script>
 import UserGreeter from '~/components/UserGreeter.vue';
+import LittleBois from '~/components/LittleBois.vue';
 
 export default {
-	components: { UserGreeter },
+	components: { UserGreeter, LittleBois },
 	layout: 'custom',
+	data() {
+		return {};
+	},
 	mounted() {
 		this.$ws.connect();
 	},
@@ -31,5 +36,18 @@ export default {
   bottom: 0;
   right: 2rem;
   margin: 1rem;
+}
+
+.littlebois {
+  position: absolute;
+  height: 200px;
+  width: 800px;
+  left: 0;
+  bottom: 0;
+  background: green;
+}
+
+.littleboi-test {
+  filter: url(#lb-test);
 }
 </style>
