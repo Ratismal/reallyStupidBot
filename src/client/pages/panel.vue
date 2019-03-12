@@ -40,14 +40,7 @@ export default {
 
 .littlebois {
   position: absolute;
-  height: 200px;
-  width: 800px;
   left: 0;
   bottom: 0;
-  background: green;
-}
-
-.littleboi-test {
-  filter: url(#lb-test);
 }
 </style>

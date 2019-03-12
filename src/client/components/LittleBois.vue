@@ -2,10 +2,12 @@
 	<div>
 		<div class='littleboi-wrapper catflex'>
 			<div v-for="user in users" :key="user.name" :style="user.style" class='littleboi'>
-				<div :class="user.messageClass">
-					{{user.message}}
+				<div class='message-wrapper catflex around'>
+					<div :class="user.messageClass">
+						{{user.message}}
+					</div>
 				</div>
-				<img src='/img/littleboi/test.gif'>
+				<img :src="user.image" :style="`filter: url(#lb-${user.name})`">
 				<svg>
 					<filter :id="`lb-${user.name}`">
 						<feColorMatrix type="matrix"
@@ -31,7 +33,7 @@ class User {
 		this.setColor(this.color);
 		this.setMatrix();
 
-		this.mx = 800;
+		this.mx = 725;
 		this.mz = 50;
 
 		this.r = 0;
@@ -39,9 +41,9 @@ class User {
 		this.b = 0;
 
 		this.vx = this.randInt(8);
-		this.vy = 5;
+		this.vy = 10;
 		this.x = this.randInt(this.mx);
-		this.y = this.randInt(300);
+		this.y = 1000;
 		this.z = this.randInt(this.mz);
 
 		this.dx = 0;
@@ -49,15 +51,35 @@ class User {
 
 		this.moving = false;
 		this.message = '';
+		this.messageHidden = true;
+
+		this.messages = [];
+		this.messageTimeout = null;
+
+		this.leavePromise = null;
 	}
 
-	addMessage(message) {}
+	addMessage(message) {
+		this.messages.push(message);
+	}
 
-	leave() {}
+	leave() {
+		return new Promise(res => {
+			this.leavePromise = res;
 
-	setMessage(message) {
-		this.message = message;
-		return this;
+			this.dx = -50;
+			this.dz = this.z;
+			this.vx = Math.abs(this.x / this.dx) / 10;
+			this.moving = true;
+		});
+	}
+	sleep(time = 1000) {
+		return new Promise(res => setTimeout(res, time));
+	}
+
+	get image() {
+		if (this.moving) return '/img/littleboi/walk.gif';
+		else return '/img/littleboi/idle1.gif';
 	}
 
 	get dimension() {
@@ -67,13 +89,13 @@ class User {
 	get messageClass() {
 		return {
 			message: true,
-			hidden: !this.message,
+			hidden: this.messageHidden,
 		};
 	}
 
 	get style() {
 		return {
-			filter: `url(#lb-${this.name})`,
+			// filter: `url(#lb-${this.name})`,
 			bottom: this.y + (50 - this.z) / 2 + 'px',
 			left: this.x + 'px',
 			width: this.dimension + 'px',
@@ -83,12 +105,23 @@ class User {
 	}
 
 	setColor(c) {
-		let color = c.replace(/[^0-9A-F]/gi, '');
-		this.setRGB(
-			parseInt(color.substring(0, 2), 16) / 255,
-			parseInt(color.substring(2, 4), 16) / 255,
-			parseInt(color.substring(2, 6), 16) / 255
-		);
+		let color;
+		if (!c) {
+			this.setRGB(
+				this.randInt(255) / 255,
+				this.randInt(255) / 255,
+				this.randInt(255) / 255,
+			);
+		} else {
+			color = c.replace(/[^0-9A-F]/gi, '');
+			console.log(c);
+
+			this.setRGB(
+				parseInt(color.substring(0, 2), 16) / 255,
+				parseInt(color.substring(2, 4), 16) / 255,
+				parseInt(color.substring(2, 6), 16) / 255
+			);
+		}
 	}
 
 	setRGB(r, g, b) {
@@ -108,20 +141,20 @@ ${1 - this.b} 0 0 0 ${this.b}
 	genDestination() {
 		let disx = this.randInt(-50, 50);
 		let disz = this.randInt(-50, 50);
-		this.dx = Math.min(this.mx, Math.max(0, this.x + disx));
-		this.dz = Math.min(this.mz, Math.max(0, this.z + disz));
-		console.log(this.name, 'pos', this.dx, this.dz);
+		this.dx = Math.min(this.mx - 20, Math.max(20, this.x + disx));
+		this.dz = Math.min(this.mz - 20, Math.max(20, this.z + disz));
+		// console.log(this.name, 'pos', this.dx, this.dz);
 
 		let s1 = Math.abs(Math.max(this.dx, this.x) - Math.min(this.dx, this.x));
 		let s2 = Math.abs(Math.max(this.dz, this.z) - Math.min(this.dz, this.z));
 		let h = Math.sqrt(s1 ** 2 + s2 ** 2);
-		let v = h / 40;
+		let v = Math.max(s1, s2, h) / 40;
 		let a = Math.tan(s1, s2);
 
-		this.vz = Math.abs(Math.sin(a) * v);
-		this.vx = Math.abs(Math.cos(a) * v);
+		this.vz = Math.max(0.25, Math.abs(Math.sin(a) * v));
+		this.vx = Math.max(0.25, Math.abs(Math.cos(a) * v));
 
-		console.log(this.name, s1, s2, h, a, this.vx, this.vz);
+		// console.log(this.name, s1, s2, h, a, this.vx, this.vz);
 		// this.vx = hx;
 		// this.vz = hz;
 		// this.vx = 1;
@@ -146,12 +179,16 @@ ${1 - this.b} 0 0 0 ${this.b}
 
 				if (this.z > this.dz) {
 					this.z = Math.max(this.dz, this.z - this.vz);
-				} else if (this.z < this.dx) {
+				} else if (this.z < this.dz) {
 					this.z = Math.min(this.dz, this.z + this.vz);
 				}
 
+				// console.log(this.name, this.x, this.dx, this.z, this.dz);
 				if (this.x === this.dx && this.z === this.dz) {
 					this.moving = false;
+
+					if (this.leavingPromise)
+						this.leavingPromise();
 				}
 			} else {
 				if (this.randInt(200) === 1) {
@@ -159,6 +196,17 @@ ${1 - this.b} 0 0 0 ${this.b}
 					this.moving = true;
 				}
 			}
+		}
+
+		if (this.messages.length > 0 && !this.messageTimeout) {
+			this.message = this.messages.shift();
+			this.messageHidden = false;
+			this.messageTimeout = setTimeout(async () => {
+				this.messageHidden = true;
+				await this.sleep(1000);
+				this.message = '';
+				this.messageTimeout = null;
+			}, 5000);
 		}
 	}
 
@@ -187,9 +235,9 @@ export default {
 	data() {
 		return {
 			users: [
-				new User('test', '#FF0088').setMessage('hi'),
-				new User('test2', '#808800'),
-				new User('test3', '#abcd00'),
+				new User('test'),
+				new User('test2'),
+				new User('test3'),
 			],
 			vy: 5,
 			eventInterval: null,
@@ -224,9 +272,12 @@ export default {
 			if (!user) user = this.userJoin({ name, color });
 			user.addMessage(text);
 		},
-		userLeave({ name }) {
+		async userLeave({ name }) {
 			let user = this.users.find(u => u.name === name);
-			if (user) user.leave();
+			if (user) {
+				await user.leave();
+				this.users.splice(this.users.indexOf(user), 1);
+			}
 		},
 		randInt(min, max) {
 			let mn = 0,
@@ -251,6 +302,11 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
+	background-image: url('/img/littleboi/background.png');
+	background-size: cover;
+
+	height: 100px;
+  width: 800px;
 }
 
 .littleboi {
@@ -262,17 +318,43 @@ export default {
   }
 }
 
+.message-wrapper {
+	position: absolute;
+  top: -40px;
+	left: -500px;
+	right: -500px;
+}
+
 .message {
-  position: absolute;
-  top: -30px;
-  left: -20px;
-  right: -20px;
+  // max-width: 100px;
   text-align: center;
   display: block;
   color: black;
   height: 20px;
-  background: white;
+  background-image: url('/img/littleboi/bubble-background.png');
+	background-repeat: repeat;
+	background-size: 32px 32px;
+	border: 2px solid black;
+	text-overflow: ellipsis;
+	padding: 0.25rem 0.5rem;
+	transition: opacity 1s;
 
+	position: relative;
+	border-radius: .4em;
+
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		width: 0;
+		height: 0;
+		border: 10px solid transparent;
+		border-top-color: black;
+		border-bottom: 0;
+		margin-left: -10px;
+		margin-bottom: -10px;
+	}
   &.hidden {
     opacity: 0;
   }
