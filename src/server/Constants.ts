@@ -48,3 +48,8 @@ export enum TwitchChatEvent {
 	STREAM_UP = 'STREAM_UP',
 	STREAM_DOWN = 'STREAM_DOWN',
 }
+
+export enum WSEvent {
+	AUTH = 'AUTH',
+	PONG = 'PONG',
+}

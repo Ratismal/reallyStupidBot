@@ -12,7 +12,9 @@ const console = Loggr.get('Server');
 import { Twitch } from './Twitch';
 import * as Koa from 'koa';
 import * as Router from 'koa-router';
+import * as websocketify from 'koa-websocket';
 import * as bodyParser from 'koa-bodyparser';
+import { CronJob } from 'cron';
 
 import TwitchClient from 'twitch';
 
@@ -22,6 +24,8 @@ const nuxtConf: any = require('$root/../nuxt.config.js');
 const { Nuxt, Builder } = require('nuxt');
 
 import { Database } from '$plugins';
+import { EventEmitter } from 'events';
+import { WSEvent } from '../Constants';
 
 export class Server {
 	public api: ComponentAPI;
@@ -30,21 +34,29 @@ export class Server {
 	public dependencies: Component[] = [Twitch];
 	public plugins: Plugin[] = [Database];
 
-	private app: Koa;
+	private app: any;
 	private router: Router;
 	private nuxt: any;
 
 	private Twitch: Twitch;
 	private db: Database;
+	private eventHandler: EventEmitter;
+
+	public connections: any[] = [];
 
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
 	private config: { [key: string]: any };
 
+	private pingInterval: CronJob;
+
 	public async onLoad() {
+		this.pingInterval = new CronJob('*/15 * * * * *', this.wsPing.bind(this));
+		this.pingInterval.start();
+		this.eventHandler = new EventEmitter;
 		this.Twitch = this.api.getComponent<Twitch>(Twitch);
 		this.db = this.api.getPlugin<Database>(Database);
 
-		this.app = new Koa();
+		this.app = websocketify(new Koa());
 		this.router = new Router({ prefix: '/api' });
 
 		this.app.use(bodyParser());
@@ -77,11 +89,77 @@ export class Server {
 			return await next();
 		});
 
+		this.app.ws.use(async (ctx: any, next: any) => {
+			console.log('Websocket connection opened.');
+			ctx.websocket.state = null;
+			ctx.websocket.sendMessage = function (msg: any) {
+				ctx.websocket.send(JSON.stringify(msg));
+			};
+			this.connections.push(ctx.websocket);
+			ctx.websocket.on('message', (msg: string) => {
+				console.log('Incoming message: ', msg);
+				try {
+					const obj = JSON.parse(msg);
+					this.eventHandler.emit(obj.code, ctx.websocket, obj);
+				} catch (err) {
+					console.error(err);
+				}
+			});
+			ctx.websocket.on('close', () => {
+				console.log('Websocket connection closed.');
+				this.connections.splice(this.connections.indexOf(ctx.websocket), 1);
+			});
+			ctx.websocket.sendMessage({
+				code: 'HELLO',
+			});
+			await next();
+		});
+
 		this.router.post('/discord/auth', this.discordLogin.bind(this));
 		this.router.post('/twitch/auth', this.twitchLogin.bind(this));
 		this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
+		this.api.forwardEvents(this.eventHandler, Object.values(WSEvent));
+
 		this.app.listen(3005);
+	}
+
+	async wsBroadcast(msg: any) {
+		for (const ws of this.connections) {
+			ws.sendMessage(msg);
+		}
+	}
+
+	async wsPing() {
+		const state = Date.now();
+		for (const ws of this.connections) {
+			if (ws.state !== null) {
+				ws.sendMessage({
+					code: 'GOODBYE',
+					message: 'Missed a ping',
+				});
+				ws.close();
+				return;
+			}
+			ws.state = state;
+			ws.sendMessage({
+				code: 'PING',
+				state,
+			});
+		}
+	}
+
+	@SubscribeEvent(Server, WSEvent.PONG)
+	handleWsPing(ws: any, obj: any) {
+		if (ws.state === obj.state) {
+			ws.state = null;
+		} else {
+			ws.sendMessage({
+				code: 'GOODBYE',
+				message: 'Invalid ping response',
+			});
+			ws.close();
+		}
 	}
 
 	async discordLogin(ctx: any, next: any) {
