@@ -1,4 +1,4 @@
-import TwitchClient, { AccessToken } from 'twitch';
+import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
 import ChatClient from 'twitch-chat-client';
 import { Database } from '$plugins';
 import { TwitchChatEvent } from '$server';
@@ -38,6 +38,7 @@ export class Twitch {
 
 	private cron: CronJob;
 	private isLive: boolean = false;
+	public user: PrivilegedUser;
 
 	public async onLoad() {
 		this.db = this.api.getPlugin<Database>(Database);
@@ -50,10 +51,12 @@ export class Twitch {
 		await this.login();
 
 		this.cron = new CronJob('* * * * *', this.cronInterval.bind(this));
+		this.cron.start();
 	}
 
 	public async cronInterval() {
 		const live = await this.isStreamLive();
+		// console.log('Ping! Stream is', live ? 'online' : 'offline', '. It was', this.isLive ? 'online' : 'offline');
 		if (live === null) return;
 		if (live && !this.isLive) {
 			this.isLive = true;
@@ -89,6 +92,7 @@ export class Twitch {
 
 				// test login
 				const user = await this.client.users.getMe();
+				this.user = user;
 				console.init('Logged in as', user.displayName);
 
 				console.init('Loading chat...');
@@ -143,18 +147,24 @@ export class Twitch {
 
 	async isStreamLive() {
 		if (this.client) {
-			return !!(await this.client.streams.getStreamByChannel(this.config.twitch.myId));
+			const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
+			// console.log(stream);
+			return stream !== null;
 		} else return null;
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_UP)
 	async handleStreamUp() {
 		console.info('Stream is now live.');
+		console.log(this.user.displayName);
+		await this.chatClient.say('#' + this.user.name, `${this.user.displayName} is now live!`);
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_DOWN)
 	async handleStreamDown() {
 		console.info('Stream is no longer live.');
+		console.log(this.user.displayName);
+		await this.chatClient.say('#' + this.user.name, `${this.user.displayName} is now offline!`);
 	}
 
 }
