@@ -235,9 +235,9 @@ export default {
 	data() {
 		return {
 			users: [
-				new User('test'),
-				new User('test2'),
-				new User('test3'),
+				// new User('test'),
+				// new User('test2'),
+				// new User('test3'),
 			],
 			vy: 5,
 			eventInterval: null,
