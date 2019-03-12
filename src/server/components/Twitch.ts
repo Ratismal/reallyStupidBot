@@ -150,7 +150,7 @@ export class Twitch {
 		console.log(args);
 	}
 
-	async isStreamLive() {
+	public async isStreamLive() {
 		if (this.client) {
 			const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
 			// console.log(stream);
