@@ -59,6 +59,9 @@ export default {
 			};
 		},
 	},
+	beforeDestroy() {
+		this.$ws.removeListener('WELCOME', this.welcomeUser.bind(this));
+	},
 	mounted() {
 		if (process.client) {
 			this.$ws.on('WELCOME', this.welcomeUser.bind(this));
@@ -82,9 +85,7 @@ export default {
 			// 	let name = names[Math.floor(Math.random() * names.length)];
 			// 	this.welcomeUser({ name });
 			// }, 25000);
-
 		}
-
 	},
 	methods: {
 		idleFunc() {
@@ -98,7 +99,12 @@ export default {
 		async welcomeUser(msg) {
 			let entry;
 			const p = new Promise(async res => {
-				entry = { name: msg.name, res, displayed: false, text: `Welcome, ${msg.name}!` };
+				entry = {
+					name: msg.name,
+					res,
+					displayed: false,
+					text: `Welcome, ${msg.name}!`,
+				};
 			});
 			this.queue.push(entry);
 			if (this.queue.length > 1) {
@@ -121,7 +127,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import url('https://fonts.googleapis.com/css?family=Press+Start+2P');
+@import url("https://fonts.googleapis.com/css?family=Press+Start+2P");
 
 .greeter-wrapper {
   height: 100px;
@@ -134,30 +140,30 @@ export default {
   overflow: hidden;
   width: 375px;
   height: 100px;
-  background-image: url('/img/catbot/bubble.png');
-	background-size: cover;
+  background-image: url("/img/catbot/bubble.png");
+  background-size: cover;
   color: rgba(0, 0, 0, 1);
-	opacity: 1;
+  opacity: 1;
   transition: width 1s ease-in-out, opacity 0.5s;
 
   .message-text {
     box-sizing: border-box;
     display: block;
     width: 375px;
-		margin: 0 1rem;
+    margin: 0 1rem;
     text-align: center;
     // word-wrap: none;
     padding: 0 10px;
     // white-space: nowrap;
     font-size: 1.1em;
-		font-family: 'Press Start 2P', monospace;
-		// word-break: break-all;
-		overflow-wrap: break-word;
-		word-wrap: break-word;
-		-webkit-hyphens: auto;
-		-ms-hyphens: auto;
-		-moz-hyphens: auto;
-		hyphens: auto;
+    font-family: "Press Start 2P", monospace;
+    // word-break: break-all;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    hyphens: auto;
   }
 
   &.hidden {
@@ -175,11 +181,9 @@ export default {
   // background: black;
   color: white;
 
-	.catbot {
-		width: 100%;
-		height: 100%;
-	}
+  .catbot {
+    width: 100%;
+    height: 100%;
+  }
 }
-
-
 </style>

@@ -2,6 +2,9 @@
 	<div>
 		<div class='littleboi-wrapper catflex'>
 			<div v-for="user in users" :key="user.name" :style="user.style" class='littleboi'>
+				<div :class="user.messageClass">
+					{{user.message}}
+				</div>
 				<img src='/img/littleboi/test.gif'>
 				<svg>
 					<filter :id="`lb-${user.name}`">
@@ -45,10 +48,27 @@ class User {
 		this.dz = 0;
 
 		this.moving = false;
+		this.message = '';
+	}
+
+	addMessage(message) {}
+
+	leave() {}
+
+	setMessage(message) {
+		this.message = message;
+		return this;
 	}
 
 	get dimension() {
 		return 50 + this.z / 2;
+	}
+
+	get messageClass() {
+		return {
+			message: true,
+			hidden: !this.message,
+		};
 	}
 
 	get style() {
@@ -167,7 +187,7 @@ export default {
 	data() {
 		return {
 			users: [
-				new User('test', '#FF0088'),
+				new User('test', '#FF0088').setMessage('hi'),
 				new User('test2', '#808800'),
 				new User('test3', '#abcd00'),
 			],
@@ -178,12 +198,30 @@ export default {
 	mounted() {
 		if (process.client) {
 			this.eventInterval = setInterval(this.eventLoop, 50);
+
+			this.$ws.on('WELCOME', this.userJoin.bind(this));
+			this.$ws.on('MESSAGE', this.userMessage.bind(this));
+			this.$ws.on('FAREWELL', this.userLeave.bind(this));
 		}
 	},
 	beforeDestroy() {
 		clearInterval(this.eventInterval);
+		this.$ws.removeListener('WELCOME', this.userJoin.bind(this));
+		this.$ws.removeListener('MESSAGE', this.userMessage.bind(this));
+		this.$ws.removeListener('FAREWELL', this.userLeave.bind(this));
 	},
 	methods: {
+		userJoin({ name, color }) {
+			this.users.push(new User(name, color));
+		},
+		userMessage({ name, text }) {
+			let user = this.users.find(u => u.name === name);
+			if (user) user.addMessage(text);
+		},
+		userLeave({ name }) {
+			let user = this.users.find(u => u.name === name);
+			if (user) user.leave();
+		},
 		randInt(min, max) {
 			let mn = 0,
 				mx;
@@ -215,6 +253,22 @@ export default {
   img {
     height: 100%;
     width: 100%;
+  }
+}
+
+.message {
+  position: absolute;
+  top: -30px;
+  left: -20px;
+  right: -20px;
+  text-align: center;
+  display: block;
+  color: black;
+  height: 20px;
+  background: white;
+
+  &.hidden {
+    opacity: 0;
   }
 }
 </style>

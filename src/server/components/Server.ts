@@ -49,7 +49,7 @@ export class Server {
 	private config: { [key: string]: any };
 
 	private pingInterval: CronJob;
-	private chatters: { [name: string]: number } = {};
+	private chatters: { [name: string]: { date: number, timeout: any } } = {};
 
 	public async onLoad() {
 		this.pingInterval = new CronJob('*/15 * * * * *', this.wsPing.bind(this));
@@ -196,18 +196,35 @@ export class Server {
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.PRIVMSG)
 	async handleMessage(channel: string, user: string, message: string, msg: PrivateMessage) {
+		if (channel !== '#reallystupidcat') return;
+
 		if (!this.chatters[user]) {
-			this.chatters[user] = 0;
+			this.chatters[user] = { date: 0, timeout: null };
 		}
-		console.log(Date.now() - this.chatters[user], channel, user);
+		// console.log(Date.now() - this.chatters[user], channel, user);
 		// check if it has been 15 minutes since last message
-		if (Date.now() - this.chatters[user] >= 1000 * 60 * 15) {
+		if (Date.now() - this.chatters[user].date >= 1000 * 60 * 15) {
 			await this.wsBroadcast({
 				code: 'WELCOME',
-				name: user
-			})
+				name: user,
+				color: msg.userInfo.color,
+			});
 		}
-		this.chatters[user] = Date.now();
+
+		if (this.chatters[user].timeout) clearTimeout(this.chatters[user].timeout);
+		this.chatters[user].timeout = setTimeout(async () => {
+			await this.wsBroadcast({
+				code: 'FAREWELL',
+				name: user,
+			});
+		}, 15 * 60 * 1000);
+		this.chatters[user].date = Date.now();
+
+		await this.wsBroadcast({
+			code: 'MESSAGE',
+			name: user,
+			text: message,
+		});
 	}
 
 }

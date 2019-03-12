@@ -36,7 +36,12 @@ class WebsocketManager extends EventEmitter {
 	async onMessage(msg) {
 		try {
 			let obj = JSON.parse(msg.data);
-
+			if (obj.code === 'PING') {
+				this.sendMessage({
+					code: 'PONG',
+					state: obj.state,
+				});
+			}
 			this.emit(obj.code, obj);
 			this.emit('message', obj);
 		} catch (err) {
