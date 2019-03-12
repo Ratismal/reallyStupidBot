@@ -15,6 +15,7 @@ import Loggr from '$loggr';
 import { EventEmitter } from 'events';
 
 import { CronJob } from 'cron';
+import { Discord } from './Discord';
 
 // import { EventEmitter } from 'events';
 const console = Loggr.get('Twitch');
@@ -23,6 +24,7 @@ export class Twitch {
 	public api: ComponentAPI;
 	public name: string = 'Twitch';
 
+	public dependencies: Component[] = [Discord];
 	public plugins: Plugin[] = [Database];
 
 	private db: Database;
@@ -40,7 +42,10 @@ export class Twitch {
 	private isLive: boolean = false;
 	public user: PrivilegedUser;
 
+	public discord: Discord;
+
 	public async onLoad() {
+		this.discord = this.api.getComponent<Discord>(Discord);
 		this.db = this.api.getPlugin<Database>(Database);
 		this.events = {};
 
@@ -158,6 +163,18 @@ export class Twitch {
 		console.info('Stream is now live.');
 		console.log(this.user.displayName);
 		await this.chatClient.say('#' + this.user.name, `${this.user.displayName} is now live!`);
+
+		let client = this.discord.client;
+
+		await client.editRole('194232473931087872', '552601274562904074', {
+			mentionable: true
+		}, 'stream announcement');
+
+		await client.createMessage('552601023064178688', '<@&552601274562904074> stupid cat is now live! https://twitch.tv/reallystupidcat');
+
+		await client.editRole('194232473931087872', '552601274562904074', {
+			mentionable: false
+		}, 'stream announcement');
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_DOWN)

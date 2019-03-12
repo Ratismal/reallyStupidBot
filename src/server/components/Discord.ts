@@ -32,9 +32,9 @@ export class Discord {
 			defaultImageFormat: 'png',
 		});
 
-		this.api.forwardEvents(this.client, Object.values(DiscordEvent));
+		// this.api.forwardEvents(this.client, Object.values(DiscordEvent));
 
-		await this.client.connect();
+		// await this.client.connect();
 	}
 
 	public async onUnload() {
