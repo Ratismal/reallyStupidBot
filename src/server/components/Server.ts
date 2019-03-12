@@ -63,7 +63,7 @@ export class Server {
 
 		this.app.use(bodyParser());
 
-		console.log(nuxtConf.dev, process.env.NODE_ENV);
+		// console.log(nuxtConf.dev, process.env.NODE_ENV);
 		this.nuxt = new Nuxt(nuxtConf);
 		if (nuxtConf.dev) {
 			const builder = new Builder(this.nuxt);
@@ -99,7 +99,7 @@ export class Server {
 			};
 			this.connections.push(ctx.websocket);
 			ctx.websocket.on('message', (msg: string) => {
-				console.log('Incoming message: ', msg);
+				// console.log('Incoming message: ', msg);
 				try {
 					const obj = JSON.parse(msg);
 					this.eventHandler.emit(obj.code, ctx.websocket, obj);
