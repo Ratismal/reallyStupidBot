@@ -38,7 +38,7 @@ module.exports = {
 		origin: config.origin,
 		clientId: config.twitch.clientId,
 	},
-	plugins: [],
+	plugins: ['~/plugins/websocket'],
 	dev: process.env.NODE_ENV === 'DEV',
 	css: [
 		'@/assets/scss/base.scss',
