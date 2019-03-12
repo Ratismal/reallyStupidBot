@@ -27,8 +27,10 @@ class WebsocketManager extends EventEmitter {
 	}
 
 	async onClose() {
-		console.log('Websocket closed');
+		console.log('Websocket closed. Reconnecting in 5 seconds...');
 		this.emit('close');
+
+		setTimeout(this.connect.bind(this), 5000);
 	}
 
 	async onMessage(msg) {

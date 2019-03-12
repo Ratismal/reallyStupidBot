@@ -25,7 +25,8 @@ const { Nuxt, Builder } = require('nuxt');
 
 import { Database } from '$plugins';
 import { EventEmitter } from 'events';
-import { WSEvent } from '../Constants';
+import { WSEvent, TwitchChatEvent } from '../Constants';
+import { PrivateMessage } from 'twitch-chat-client';
 
 export class Server {
 	public api: ComponentAPI;
@@ -48,6 +49,7 @@ export class Server {
 	private config: { [key: string]: any };
 
 	private pingInterval: CronJob;
+	private chatters: { [name: string]: number } = {};
 
 	public async onLoad() {
 		this.pingInterval = new CronJob('*/15 * * * * *', this.wsPing.bind(this));
@@ -190,6 +192,22 @@ export class Server {
 	}
 
 	public async onUnload() {
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.PRIVMSG)
+	async handleMessage(channel: string, user: string, message: string, msg: PrivateMessage) {
+		if (!this.chatters[user]) {
+			this.chatters[user] = 0;
+		}
+		console.log(Date.now() - this.chatters[user], channel, user);
+		// check if it has been 15 minutes since last message
+		if (Date.now() - this.chatters[user] >= 1000 * 60 * 15) {
+			await this.wsBroadcast({
+				code: 'WELCOME',
+				name: user
+			})
+		}
+		this.chatters[user] = Date.now();
 	}
 
 }

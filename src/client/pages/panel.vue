@@ -10,6 +10,9 @@ import UserGreeter from '~/components/UserGreeter.vue';
 export default {
 	components: { UserGreeter },
 	layout: 'custom',
+	mounted() {
+		this.$ws.connect();
+	},
 };
 </script>
 
@@ -26,7 +29,7 @@ export default {
 .user-greeter {
   position: absolute;
   bottom: 0;
-  right: 0;
+  right: 2rem;
   margin: 1rem;
 }
 </style>
