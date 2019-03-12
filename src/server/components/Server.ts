@@ -111,6 +111,7 @@ export class Server {
 			});
 			ctx.websocket.sendMessage({
 				code: 'HELLO',
+				message: 'If you\'re reading this, you\'re gay. Please authenticate.',
 			});
 			await next();
 		});
