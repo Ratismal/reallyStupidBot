@@ -154,6 +154,9 @@ export class Twitch {
 		if (this.client) {
 			const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
 			// console.log(stream);
+			// if (stream !== null)
+			// 	this.eventHandler.emit('STREAM_UP');
+
 			return stream !== null;
 		} else return null;
 	}
@@ -166,14 +169,16 @@ export class Twitch {
 
 		let client = this.discord.client;
 
-		await client.editRole('194232473931087872', '552601274562904074', {
-			mentionable: true
+		const { guildId, roleId, channelId } = this.config.discord;
+
+		await client.editRole(guildId, roleId, {
+			mentionable: true,
 		}, 'stream announcement');
 
-		await client.createMessage('552601023064178688', '<@&552601274562904074> stupid cat is now live! https://twitch.tv/reallystupidcat');
+		await client.createMessage(channelId, `<@&${roleId}> stupid cat is now live! https://twitch.tv/reallystupidcat`);
 
-		await client.editRole('194232473931087872', '552601274562904074', {
-			mentionable: false
+		await client.editRole(guildId, roleId, {
+			mentionable: false,
 		}, 'stream announcement');
 	}
 

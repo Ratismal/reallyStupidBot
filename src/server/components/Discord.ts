@@ -32,14 +32,19 @@ export class Discord {
 			defaultImageFormat: 'png',
 		});
 
-		// this.api.forwardEvents(this.client, Object.values(DiscordEvent));
+		this.api.forwardEvents(this.client, Object.values(DiscordEvent));
 
-		// await this.client.connect();
+		await this.client.connect();
 	}
 
 	public async onUnload() {
 		this.client.disconnect({ reconnect: false });
 		this.client.removeAllListeners();
 		this.client = null;
+	}
+
+	@SubscribeEvent(Discord, DiscordEvent.SHARD_READY)
+	async handleShardReady(id: number) {
+		console.log(id, 'READY');
 	}
 }
