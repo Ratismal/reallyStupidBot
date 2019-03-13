@@ -169,13 +169,23 @@ export class Twitch {
 
 		let client = this.discord.client;
 
+		const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
+		const url = stream.getPreviewUrl('large');
+
 		const { guildId, roleId, channelId } = this.config.discord;
 
 		await client.editRole(guildId, roleId, {
 			mentionable: true,
 		}, 'stream announcement');
 
-		await client.createMessage(channelId, `<@&${roleId}> stupid cat is now live! https://twitch.tv/reallystupidcat`);
+		await client.createMessage(channelId, {
+			content: `<@&${roleId}> stupid cat is now live! <https://twitch.tv/reallystupidcat>`,
+			embed: {
+				image: {
+					url,
+				},
+			},
+		});
 
 		await client.editRole(guildId, roleId, {
 			mentionable: false,
