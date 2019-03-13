@@ -61,6 +61,7 @@ class User {
 		this.messageTimeout = null;
 
 		this.leavePromise = null;
+		this.leaveRej = null;
 
 		this.state = 'IDLE';
 	}
@@ -70,13 +71,15 @@ class User {
 	}
 
 	leave() {
-		return new Promise(res => {
+		return new Promise((res, rej) => {
 			this.leavePromise = res;
+			this.leaveRej = rej;
 
 			this.dx = -100;
 			this.dz = this.z;
 			this.vx = 2;
 			this.moving = true;
+			this.state = 'WALK';
 		});
 	}
 	sleep(time = 1000) {
@@ -192,9 +195,8 @@ class User {
 					this.moving = false;
 					this.state = 'IDLE';
 
-					if (this.leavingPromise) {
-						console.log('resolving leave promise');
-						this.leavingPromise();
+					if (this.leavePromise) {
+						this.leavePromise();
 					}
 				}
 			} else {
@@ -273,21 +275,40 @@ export default {
 			if (!user) {
 				user = new User(name, color);
 				this.users.push(user);
+			} else {
+				if (user.leavePromise) {
+					user.leaveRej();
+					user.moving = false;
+					user.state = 'IDLE';
+					user.dx = user.x;
+					user.dz = user.z;
+				}
 			}
 			return user;
 		},
 		userMessage({ name, text, color }) {
 			let user = this.users.find(u => u.name === name);
 			if (!user) user = this.userJoin({ name, color });
+			if (user.leavePromise) {
+				user.leaveRej();
+				user.moving = false;
+				user.state = 'IDLE';
+				user.dx = user.x;
+				user.dz = user.z;
+			}
 			user.addMessage(text);
 		},
 		async userLeave({ name }) {
 			console.log('farewell,', name, '!');
 			let user = this.users.find(u => u.name === name);
 			if (user) {
-				await user.leave();
-				console.log("they're gone now");
-				this.users.splice(this.users.indexOf(user), 1);
+				try {
+					await user.leave();
+					console.log("they're gone now");
+					this.users.splice(this.users.indexOf(user), 1);
+				} catch (err) {
+
+				}
 			}
 		},
 		randInt(min, max) {

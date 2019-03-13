@@ -217,7 +217,7 @@ export class Server {
 				code: 'FAREWELL',
 				name: user,
 			});
-		}, 1 * 60 * 1000);
+		}, 15 * 60 * 1000);
 		this.chatters[user].date = Date.now();
 
 		await this.wsBroadcast({
