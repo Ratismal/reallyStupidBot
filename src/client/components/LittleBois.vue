@@ -242,14 +242,10 @@ class User {
 }
 
 export default {
-	components: {LittleBoiSprite},
+	components: { LittleBoiSprite },
 	data() {
 		return {
-			users: [
-				// new User('test'),
-				// new User('test2'),
-				// new User('test3'),
-			],
+			users: [new User('test'), new User('test2'), new User('test3')],
 			vy: 5,
 			eventInterval: null,
 		};
@@ -306,9 +302,7 @@ export default {
 					await user.leave();
 					console.log("they're gone now");
 					this.users.splice(this.users.indexOf(user), 1);
-				} catch (err) {
-
-				}
+				} catch (err) {}
 			}
 		},
 		randInt(min, max) {

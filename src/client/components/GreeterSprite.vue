@@ -14,12 +14,12 @@ export default {
 		return {
 			states: {
 				IDLE: [
-					{src: '/img/catbot/idle1.gif', duration: 3200},
-					{src: '/img/catbot/idle2.gif', duration: 3200},
+					{ src: '/img/catbot/idle1.gif', duration: 3200, priority: 3 },
+					{ src: '/img/catbot/idle2.gif', duration: 3200 },
 				],
-				LEFT: [{src: '/img/catbot/left.gif', duration: 400}],
-				RIGHT: [{src: '/img/catbot/right.gif', duration: 400}],
-				ACTIVE: [{src: '/img/catbot/active.gif', duration: 200}],
+				LEFT: [{ src: '/img/catbot/left.gif', duration: 400 }],
+				RIGHT: [{ src: '/img/catbot/right.gif', duration: 400 }],
+				ACTIVE: [{ src: '/img/catbot/active.gif', duration: 200 }],
 			},
 		};
 	},
@@ -28,7 +28,7 @@ export default {
 
 <style lang="scss" scoped>
 .sprite {
-	height: 100%;
-	width: 100%;
+  height: 100%;
+  width: 100%;
 }
 </style>

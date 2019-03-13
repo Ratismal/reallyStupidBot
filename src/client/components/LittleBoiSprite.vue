@@ -13,8 +13,14 @@ export default {
 	data() {
 		return {
 			states: {
-				IDLE: [{src: '/img/littleboi/idle1.gif', duration: 3200}],
-				WALK: [{src: '/img/littleboi/walk.gif', duration: 800}],
+				IDLE: [
+					{ src: '/img/littleboi/idle1.gif', duration: 3200, priority: 12 },
+					{ src: '/img/littleboi/idle2.gif', duration: 1600 },
+					{ src: '/img/littleboi/idle3.gif', duration: 3200 },
+					{ src: '/img/littleboi/idle4.gif', duration: 1600 },
+					{ src: '/img/littleboi/idle5.gif', duration: 3200 },
+				],
+				WALK: [{ src: '/img/littleboi/walk.gif', duration: 800 }],
 			},
 		};
 	},

@@ -12,6 +12,7 @@ export default {
 	data() {
 		return {
 			states: {},
+			compStates: {},
 			current: null,
 			lastTimeout: null,
 			framePromise: null,
@@ -22,6 +23,23 @@ export default {
 		if (Array.isArray(this.current)) this.current = this.current[0];
 
 		if (process.client && !this.cache) {
+			for (const key in this.states) {
+				let state = this.states[key];
+				if (Array.isArray(state)) {
+					let s = [];
+					for (const _state of state) {
+						let priority = 1;
+						if (_state.priority) priority = _state.priority;
+						for (let i = 0; i < priority; i++) {
+							s.push(_state);
+						}
+					}
+					this.compStates[key] = s;
+				} else {
+					this.compStates[key] = state;
+				}
+			}
+
 			this.selectState();
 			console.log(this.current);
 			if (this.current)
@@ -50,10 +68,11 @@ export default {
 	},
 	methods: {
 		selectState() {
-			let state = this.states[this.state];
+			let state = this.compStates[this.state];
 			if (state) {
 				if (Array.isArray(state)) {
-				// get a random state
+
+					// get a random state
 					state = state[Math.floor(Math.random() * state.length)];
 				}
 				this.current = state;
