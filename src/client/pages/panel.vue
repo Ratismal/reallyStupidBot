@@ -1,7 +1,7 @@
 <template>
 	<main class='container'>
-		<user-greeter class='user-greeter'/>
-		<little-bois class='littlebois'/>
+		<user-greeter class='user-greeter' v-if="!hide.greeter"/>
+		<little-bois class='littlebois' v-if="!hide.littlebois"/>
 	</main>
 </template>
 
@@ -10,13 +10,28 @@ import UserGreeter from '~/components/UserGreeter.vue';
 import LittleBois from '~/components/LittleBois.vue';
 
 export default {
-	components: { UserGreeter, LittleBois },
+	components: { UserGreeter, LittleBois},
 	layout: 'custom',
 	data() {
-		return {};
+		return {
+			state: 'IDLE',
+			hide: {
+				littlebois: false,
+				greeter: false,
+			},
+		};
 	},
 	mounted() {
-		this.$ws.connect();
+		if (this.$route.query.hide) {
+			let toHide = this.$route.query.hide.split(',');
+			for (const hide of toHide) {
+				if (this.hide[hide] !== undefined) this.hide[hide] = true;
+			}
+		}
+
+		if (process.client) {
+			this.$ws.connect();
+		}
 	},
 };
 </script>
@@ -36,6 +51,8 @@ export default {
   bottom: 0;
   right: 2rem;
   margin: 1rem;
+
+  z-index: 999;
 }
 
 .littlebois {

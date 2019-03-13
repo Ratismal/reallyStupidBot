@@ -1,6 +1,9 @@
 <template>
 	<div class='greeter-wrapper catflex vert-align'>
-		<div class='icon'><img :src="imagePath" class='catbot'></div>
+		<greeter-sprite :cache="true"/>
+		<div class='icon'>
+			<greeter-sprite :state="state" class='catbot'/>
+		</div>
 		<div :class='messageClass'>
 			<span class='message-text' v-if="current">
 				{{current.text}}
@@ -10,32 +13,18 @@
 </template>
 
 <script>
+import GreeterSprite from '~/components/GreeterSprite.vue';
+
 export default {
+	components: {GreeterSprite},
 	data() {
 		return {
 			queue: [],
-			state: null,
-			image: 'idle1.gif',
-			images: {
-				idle: ['idle1.gif', 'idle1.gif', 'idle1.gif', 'idle2.gif'],
-				OPENING: 'left.gif',
-				CLOSING: 'right.gif',
-				OPEN: 'active.gif',
-			},
-			idleInterval: null,
+			state: 'IDLE',
 		};
 	},
 	watch: {
-		state() {
-			console.log(this.state);
-			if (this.state === 'IDLE') {
-				this.idleInterval = setInterval(this.idleFunc.bind(this), 3200);
-				this.idleFunc();
-			} else {
-				clearInterval(this.idleInterval);
-				this.image = this.images[this.state];
-			}
-		},
+
 	},
 	computed: {
 		imagePath() {
@@ -53,7 +42,7 @@ export default {
 			return {
 				'message-wrapper': true,
 				hidden: this.current ? !this.current.displayed : true,
-				'text-hidden': this.state !== 'OPEN',
+				'text-hidden': this.state !== 'ACTIVE',
 				catflex: true,
 				'vert-align': true,
 			};
@@ -88,11 +77,6 @@ export default {
 		}
 	},
 	methods: {
-		idleFunc() {
-			let idles = this.images.idle;
-			let img = idles[Math.floor(Math.random() * idles.length)];
-			this.image = img;
-		},
 		sleep(time = 5000) {
 			return new Promise(res => setTimeout(res, time));
 		},
@@ -111,12 +95,12 @@ export default {
 				await p;
 			}
 			entry.displayed = true;
-			this.state = 'OPENING';
+			this.state = 'LEFT';
 			await this.sleep(1000);
-			this.state = 'OPEN';
+			this.state = 'ACTIVE';
 			await this.sleep(5000);
 			entry.displayed = false;
-			this.state = 'CLOSING';
+			this.state = 'RIGHT';
 			await this.sleep(1000);
 			this.queue.shift();
 			if (this.queue[0]) this.queue[0].res();

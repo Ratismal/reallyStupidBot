@@ -1,5 +1,7 @@
 <template>
 	<div>
+		<little-boi-sprite :cache="true"/>
+
 		<div class='littleboi-wrapper catflex'>
 			<div v-for="user in users" :key="user.name" :style="user.style" class='littleboi'>
 				<div class='message-wrapper catflex around'>
@@ -7,7 +9,7 @@
 						{{user.message}}
 					</div>
 				</div>
-				<img :src="user.image" :style="`filter: url(#lb-${user.name})`">
+				<little-boi-sprite :state="user.state" :style="`filter: url(#lb-${user.name})`"/>
 				<svg>
 					<filter :id="`lb-${user.name}`">
 						<feColorMatrix type="matrix"
@@ -25,6 +27,8 @@
 </template>
 
 <script>
+import LittleBoiSprite from '~/components/LittleBoiSprite.vue';
+
 class User {
 	constructor(name, color) {
 		this.name = name;
@@ -57,6 +61,8 @@ class User {
 		this.messageTimeout = null;
 
 		this.leavePromise = null;
+
+		this.state = 'IDLE';
 	}
 
 	addMessage(message) {
@@ -67,19 +73,14 @@ class User {
 		return new Promise(res => {
 			this.leavePromise = res;
 
-			this.dx = -50;
+			this.dx = -100;
 			this.dz = this.z;
-			this.vx = Math.abs(this.x / this.dx) / 10;
+			this.vx = 2;
 			this.moving = true;
 		});
 	}
 	sleep(time = 1000) {
 		return new Promise(res => setTimeout(res, time));
-	}
-
-	get image() {
-		if (this.moving) return '/img/littleboi/walk.gif';
-		else return '/img/littleboi/idle1.gif';
 	}
 
 	get dimension() {
@@ -110,7 +111,7 @@ class User {
 			this.setRGB(
 				this.randInt(255) / 255,
 				this.randInt(255) / 255,
-				this.randInt(255) / 255,
+				this.randInt(255) / 255
 			);
 		} else {
 			color = c.replace(/[^0-9A-F]/gi, '');
@@ -151,8 +152,8 @@ ${1 - this.b} 0 0 0 ${this.b}
 		let v = Math.max(s1, s2, h) / 40;
 		let a = Math.tan(s1, s2);
 
-		this.vz = Math.max(0.25, Math.abs(Math.sin(a) * v));
-		this.vx = Math.max(0.25, Math.abs(Math.cos(a) * v));
+		this.vz = Math.max(0.5, Math.abs(Math.sin(a) * v));
+		this.vx = Math.max(0.5, Math.abs(Math.cos(a) * v));
 
 		// console.log(this.name, s1, s2, h, a, this.vx, this.vz);
 		// this.vx = hx;
@@ -186,14 +187,18 @@ ${1 - this.b} 0 0 0 ${this.b}
 				// console.log(this.name, this.x, this.dx, this.z, this.dz);
 				if (this.x === this.dx && this.z === this.dz) {
 					this.moving = false;
+					this.state = 'IDLE';
 
-					if (this.leavingPromise)
+					if (this.leavingPromise) {
+						console.log('resolving leave promise');
 						this.leavingPromise();
+					}
 				}
 			} else {
 				if (this.randInt(200) === 1) {
 					this.genDestination();
 					this.moving = true;
+					this.state = 'WALK';
 				}
 			}
 		}
@@ -217,7 +222,7 @@ ${1 - this.b} 0 0 0 ${this.b}
 		else {
 			(mn = min), (mx = max);
 		}
-		return Math.floor(Math.random() * mx) + mn;
+		return Math.floor(Math.random() * (mx - mn)) + mn;
 	}
 
 	setVelocity(vx) {
@@ -232,6 +237,7 @@ ${1 - this.b} 0 0 0 ${this.b}
 }
 
 export default {
+	components: {LittleBoiSprite},
 	data() {
 		return {
 			users: [
@@ -273,9 +279,11 @@ export default {
 			user.addMessage(text);
 		},
 		async userLeave({ name }) {
+			console.log('farewell,', name, '!');
 			let user = this.users.find(u => u.name === name);
 			if (user) {
 				await user.leave();
+				console.log("they're gone now");
 				this.users.splice(this.users.indexOf(user), 1);
 			}
 		},
@@ -286,7 +294,7 @@ export default {
 			else {
 				(mn = min), (mx = max);
 			}
-			return Math.floor(Math.random() * mx) + mn;
+			return Math.floor(Math.random() * (mx - mn)) + mn;
 		},
 		eventLoop() {
 			for (const user of this.users) {
@@ -302,10 +310,10 @@ export default {
   position: relative;
   height: 100%;
   width: 100%;
-	background-image: url('/img/littleboi/background.png');
-	background-size: cover;
+  background-image: url("/img/littleboi/background.png");
+  background-size: cover;
 
-	height: 100px;
+  height: 100px;
   width: 800px;
 }
 
@@ -319,10 +327,10 @@ export default {
 }
 
 .message-wrapper {
-	position: absolute;
+  position: absolute;
   top: -40px;
-	left: -500px;
-	right: -500px;
+  left: -500px;
+  right: -500px;
 }
 
 .message {
@@ -331,30 +339,30 @@ export default {
   display: block;
   color: black;
   height: 20px;
-  background-image: url('/img/littleboi/bubble-background.png');
-	background-repeat: repeat;
-	background-size: 32px 32px;
-	border: 2px solid black;
-	text-overflow: ellipsis;
-	padding: 0.25rem 0.5rem;
-	transition: opacity 1s;
+  background-image: url("/img/littleboi/bubble-background.png");
+  background-repeat: repeat;
+  background-size: 32px 32px;
+  border: 2px solid black;
+  text-overflow: ellipsis;
+  padding: 0.25rem 0.5rem;
+  transition: opacity 1s;
 
-	position: relative;
-	border-radius: .4em;
+  position: relative;
+  border-radius: 0.4em;
 
-	&::after {
-		content: '';
-		position: absolute;
-		bottom: 0;
-		left: 50%;
-		width: 0;
-		height: 0;
-		border: 10px solid transparent;
-		border-top-color: black;
-		border-bottom: 0;
-		margin-left: -10px;
-		margin-bottom: -10px;
-	}
+  &::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: black;
+    border-bottom: 0;
+    margin-left: -10px;
+    margin-bottom: -10px;
+  }
   &.hidden {
     opacity: 0;
   }
