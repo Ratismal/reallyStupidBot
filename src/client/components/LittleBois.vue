@@ -245,7 +245,9 @@ export default {
 	components: { LittleBoiSprite },
 	data() {
 		return {
-			users: [new User('test'), new User('test2'), new User('test3')],
+			users: [
+				// new User('test'), new User('test2'), new User('test3')
+			],
 			vy: 5,
 			eventInterval: null,
 		};
