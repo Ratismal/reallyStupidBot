@@ -1,4 +1,9 @@
-import TwitchClient, { AccessToken, PrivilegedUser } from 'twitch';
+import TwitchClient, {
+	AccessToken,
+	PrivilegedUser,
+	StaticAuthProvider,
+	RefreshableAuthProvider,
+} from 'twitch';
 import ChatClient from 'twitch-chat-client';
 import { Database } from '$plugins';
 import { TwitchChatEvent } from '$server';
@@ -44,6 +49,8 @@ export class Twitch {
 
 	public discord: Discord;
 
+	private authProvider: RefreshableAuthProvider;
+
 	public async onLoad() {
 		this.discord = this.api.getComponent<Discord>(Discord);
 		this.db = this.api.getPlugin<Database>(Database);
@@ -76,9 +83,11 @@ export class Twitch {
 	}
 
 	private refresh(id: string): (token: AccessToken) => void {
-		return async function refreshToken(token: AccessToken) {
+		return async (token: AccessToken) => {
+			console.init('Refreshing token...');
 			const auth = await this.db.auth.findByPk(id);
-			auth.set('accessToken', token);
+			auth.set('accessToken', token.accessToken);
+			auth.set('refreshToken', token.refreshToken);
 			await auth.save();
 		};
 	}
@@ -88,15 +97,29 @@ export class Twitch {
 			// retrieve oauth tokens for the connection with myself
 			const auth = await this.db.auth.findByPk(this.config.twitch.myId);
 			if (auth) {
+				console.log(auth.dataValues);
+				this.authProvider = new RefreshableAuthProvider(
+					new StaticAuthProvider(this.config.twitch.clientId, auth.get('accessToken')), {
+						clientSecret: this.config.twitch.clientSecret,
+						refreshToken: auth.get('refreshToken'),
+						onRefresh: this.refresh(auth.id),
+					});
 				// create a client
-				this.client = TwitchClient.withCredentials(this.config.twitch.clientId, auth.get('accessToken'), {
-					clientSecret: this.config.twitch.clientSecret,
-					refreshToken: auth.get('refreshToken'),
-					onRefresh: this.refresh(auth.id),
+				this.client = new TwitchClient({
+					preAuth: true,
+					authProvider: this.authProvider,
 				});
 
+				console.init('Testing login...');
+				let user;
 				// test login
-				const user = await this.client.users.getMe();
+				try {
+					user = await this.client.users.getMe();
+				} catch (err) {
+					await this.authProvider.refresh();
+					console.warn('Failed. Trying again...');
+					user = await this.client.users.getMe();
+				}
 				this.user = user;
 				console.init('Logged in as', user.displayName);
 
