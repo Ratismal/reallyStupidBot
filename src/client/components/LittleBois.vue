@@ -120,7 +120,7 @@ class User {
 			this.setRGB(
 				parseInt(color.substring(0, 2), 16) / 255,
 				parseInt(color.substring(2, 4), 16) / 255,
-				parseInt(color.substring(2, 6), 16) / 255
+				parseInt(color.substring(4, 6), 16) / 255
 			);
 		}
 	}
@@ -132,10 +132,13 @@ class User {
 	}
 
 	setMatrix() {
-		const matrix = `${1 - this.r} 0 0 0 ${this.r}
-${1 - this.g} 0 0 0 ${this.g}
-${1 - this.b} 0 0 0 ${this.b}
-0    0 0 1 0`;
+		const matrix = [
+			[this.r, 0, 0, 0, 0].join(' '),
+			[0, this.g, 0, 0, 0].join(' '),
+			[0, 0, this.b, 0, 0].join(' '),
+			[0, 0, 0, 1, 0].join(' '),
+		].join('\n');
+
 		this.matrix = matrix;
 	}
 
