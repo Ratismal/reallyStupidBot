@@ -2,7 +2,7 @@
 	<div>
 		<little-boi-sprite :cache="true"/>
 
-		<div class='littleboi-wrapper catflex'>
+		<div :class="['littleboi-wrapper','catflex', season]">
 			<div v-for="user in users" :key="user.name" :style="user.style" class='littleboi'>
 				<div class='message-wrapper catflex around'>
 					<div :class="user.messageClass">
@@ -14,10 +14,6 @@
 					<filter :id="`lb-${user.name}`">
 						<feColorMatrix type="matrix"
 							:values="user.matrix"/>
-							<!-- 0.393 0.769 0.189 0 0
-							0.349 0.686 0.168 0 0
-							0.272 0.534 0.131 0 0
-							0   0   0   1 0 -->
 					</filter>
 				</svg>
 			</div>
@@ -100,7 +96,7 @@ class User {
 	get style() {
 		return {
 			// filter: `url(#lb-${this.name})`,
-			bottom: this.y + (50 - this.z) / 2 + 'px',
+			bottom: this.y + (50 - this.z) / 2 + 68 + 'px',
 			left: this.x + 'px',
 			width: this.dimension + 'px',
 			height: this.dimension + 'px',
@@ -250,10 +246,15 @@ export default {
 			],
 			vy: 5,
 			eventInterval: null,
+			seasons: ['spring', 'winter'],
+			season: null,
 		};
 	},
 	mounted() {
 		if (process.client) {
+			this.season = this.seasons[
+				Math.floor(Math.random() * this.seasons.length)
+			];
 			this.eventInterval = setInterval(this.eventLoop, 50);
 
 			this.$ws.on('WELCOME', this.userJoin.bind(this));
@@ -328,13 +329,20 @@ export default {
 <style lang="scss" scoped>
 .littleboi-wrapper {
   position: relative;
-  height: 100%;
-  width: 100%;
-  background-image: url("/img/littleboi/background.png");
+  // height: 100%;
+  // width: 100%;
   background-size: cover;
+  margin-bottom: -68px;
 
-  height: 100px;
+  height: 192px;
   width: 800px;
+
+  &.spring {
+    background-image: url("/img/littleboi/back-spring.png");
+  }
+  &.winter {
+    background-image: url("/img/littleboi/back-winter.png");
+  }
 }
 
 .littleboi {

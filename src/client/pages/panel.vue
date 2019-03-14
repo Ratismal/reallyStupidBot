@@ -1,7 +1,7 @@
 <template>
 	<main class='container'>
-		<user-greeter class='user-greeter' v-if="!hide.greeter"/>
-		<little-bois class='littlebois' v-if="!hide.littlebois"/>
+		<user-greeter class='user-greeter' v-if="!elements.greeter.hide" :style="elements.greeter.style"/>
+		<little-bois class='littlebois' v-if="!elements.littlebois.hide" :style="elements.littlebois.style"/>
 	</main>
 </template>
 
@@ -10,24 +10,68 @@ import UserGreeter from '~/components/UserGreeter.vue';
 import LittleBois from '~/components/LittleBois.vue';
 
 export default {
-	components: { UserGreeter, LittleBois},
+	components: { UserGreeter, LittleBois },
 	layout: 'custom',
 	data() {
 		return {
 			state: 'IDLE',
+			elements: {
+				littlebois: {
+					style: {
+						top: null,
+						right: null,
+						bottom: 0,
+						left: 0,
+					},
+					hide: false,
+				},
+				greeter: {
+					style: {
+						top: null,
+						right: '2rem',
+						bottom: 0,
+						left: null,
+					},
+					hide: false,
+				},
+			},
 			hide: {
 				littlebois: false,
 				greeter: false,
 			},
+			lbpos: 0,
+			cbbottom: 0,
+			cbright: '2rem',
 		};
 	},
 	mounted() {
 		if (this.$route.query.hide) {
 			let toHide = this.$route.query.hide.split(',');
 			for (const hide of toHide) {
-				if (this.hide[hide] !== undefined) this.hide[hide] = true;
+				if (this.elements[hide]) this.elements[hide].hide = true;
 			}
 		}
+
+		let directions = ['top', 'right', 'bottom', 'left'];
+		if (this.$route.query.position) {
+			let poses = this.$route.query.position.split('|');
+			for (const pos of poses) {
+				let [el, parts] = pos.split(':');
+				if (this.elements[el]) {
+					let coords = parts.split(',');
+					for (let i = 0; i < directions.length; i++) {
+						if (coords[i] !== '') {
+							if (coords[i] === 'null') coords[i] = null;
+							this.elements[el].style[directions[i]] = coords[i];
+						}
+					}
+				}
+			}
+		}
+
+		// if (this.$route.query.lbpos) {
+		// 	this.lbpos = this.$route.query.lbpos;
+		// }
 
 		if (process.client) {
 			this.$ws.connect();
