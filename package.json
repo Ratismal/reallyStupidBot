@@ -12,7 +12,8 @@
 		"sequelize": "sequelize",
 		"build": "rm -rf dist/ && tsc && nuxt build",
 		"start": "npm run build && node dist/index.js",
-		"dev": "rm -rf dist/ && tsc && cross-env NODE_ENV=DEV node dist/index.js"
+		"dev": "rm -rf dist/ && tsc && cross-env NODE_ENV=DEV node dist/index.js",
+		"copy": "node scripts/copyImg.js"
 	},
 	"dependencies": {
 		"@ayana/bento": "^1.0.0-beta.1",
