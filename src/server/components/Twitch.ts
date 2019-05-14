@@ -14,6 +14,7 @@ import {
 	SubscribeEvent,
 	Variable,
 	VariableDefinitionType,
+	Inject,
 } from '@ayana/bento';
 
 import Loggr from '$loggr';
@@ -47,13 +48,12 @@ export class Twitch {
 	private isLive: boolean = false;
 	public user: PrivilegedUser;
 
+	@Inject(Discord)
 	public discord: Discord;
 
 	private authProvider: RefreshableAuthProvider;
 
 	public async onLoad() {
-		this.discord = this.api.getComponent<Discord>(Discord);
-		this.db = this.api.getPlugin<Database>(Database);
 		this.events = {};
 
 		this.eventHandler = new EventEmitter();
