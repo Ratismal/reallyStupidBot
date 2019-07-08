@@ -22,6 +22,10 @@ export class Database implements Plugin {
 		}
 	}
 
+	public async onComponentLoad(component: any): Promise<void> {
+		component.db = this;
+	}
+
 	get db() {
 		return db;
 	}

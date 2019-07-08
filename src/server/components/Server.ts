@@ -5,6 +5,7 @@ import {
 	Component,
 	Plugin,
 	VariableDefinitionType,
+	Inject,
 } from '@ayana/bento';
 
 import Loggr from '$loggr';
@@ -32,13 +33,14 @@ export class Server {
 	public api: ComponentAPI;
 	public name: string = 'Server';
 
-	public dependencies: Component[] = [Twitch];
+	public dependencies: Component[] = [];
 	public plugins: Plugin[] = [Database];
 
 	private app: any;
 	private router: Router;
 	private nuxt: any;
 
+	@Inject(Twitch)
 	private Twitch: Twitch;
 	private db: Database;
 	private eventHandler: EventEmitter;
@@ -55,8 +57,6 @@ export class Server {
 		this.pingInterval = new CronJob('*/15 * * * * *', this.wsPing.bind(this));
 		this.pingInterval.start();
 		this.eventHandler = new EventEmitter;
-		this.Twitch = this.api.getComponent<Twitch>(Twitch);
-		this.db = this.api.getPlugin<Database>(Database);
 
 		this.app = websocketify(new Koa());
 		this.router = new Router({ prefix: '/api' });

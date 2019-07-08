@@ -50,7 +50,7 @@ export class Uptime implements Command {
 		this.startDate = null;
 	}
 
-	
+
 
 
 }

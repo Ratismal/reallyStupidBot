@@ -11,6 +11,7 @@ import {
 	Variable,
 	VariableDefinitionType,
 	FSComponentLoader,
+	Inject
 } from '@ayana/bento';
 
 import { TwitchChatEvent } from '$server';
@@ -21,12 +22,14 @@ export class TwitchCommands {
 	public api: ComponentAPI;
 	public name: string = 'TwitchCommands';
 
-	public dependencies: Component[] = [Twitch];
+	public dependencies: Component[] = [];
 	public plugins: Plugin[] = [Database];
 
 	private prefix: string;
 	public commands: Map<string, Command> = new Map();
 	private db: Database;
+
+	@Inject(Twitch)
 	private Twitch: Twitch;
 
 	@Variable({ type: VariableDefinitionType.OBJECT, name: '_config' })
@@ -34,8 +37,6 @@ export class TwitchCommands {
 
 	public async onLoad() {
 		this.prefix = this.config.twitch.prefix || '!';
-		this.db = this.api.getPlugin<Database>(Database);
-		this.Twitch = this.api.getComponent<Twitch>(Twitch);
 
 		await this.api.loadComponents(FSComponentLoader, __dirname, 'commands');
 	}
