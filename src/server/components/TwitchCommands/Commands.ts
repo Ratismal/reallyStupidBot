@@ -109,7 +109,7 @@ export class TwitchCommands {
 			const c = this.commands.get(command);
 
 			try {
-				if (c.validate && await c.validate(ctx)) {
+				if (!c.validate || await c.validate(ctx)) {
 					const res: void | string = await c.execute(ctx);
 					if (typeof res === 'string') {
 						await ctx.client.say(ctx.channel, res);
