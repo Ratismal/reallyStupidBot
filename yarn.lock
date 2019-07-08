@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@ayana/bento@^1.0.0-beta.1":
-  version "1.0.0-beta.1"
-  resolved "https://registry.yarnpkg.com/@ayana/bento/-/bento-1.0.0-beta.1.tgz#8709386b0ee8d88ece7ff37501c983c7925101e4"
-  integrity sha512-U7hWx0LgmxD16BSjzdKaM76KIBWMIWT+olXOWk76obAolJYxRxUkfSDqnaVk96rs4jYVSM9xOlMaSEfFIdem5g==
+"@ayana/bento@^1.0.0-beta.2":
+  version "1.0.0-beta.2"
+  resolved "https://registry.yarnpkg.com/@ayana/bento/-/bento-1.0.0-beta.2.tgz#815873839f82bd6d3527a2d9d5bf4b975d90ffec"
+  integrity sha512-9r8c/Jo7VEaNrK96ADLKqDdDNVHmAbBBzRpt/xZfi8641eYtGTQ8DbzBJeZ4TJiBMgIpNZBBb6xIK1Ju4kf/Eg==
   dependencies:
     "@ayana/errors" "^0.0.4"
     "@ayana/logger-api" "^2.0.0"
