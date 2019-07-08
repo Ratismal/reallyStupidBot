@@ -7,4 +7,5 @@ export interface Command extends Component {
 	description?: string;
 	aliases?: string[];
 	execute(arg?: CommandContext): Promise<void | string>;
+	validate?(arg?: CommandContext): Promise<boolean>;
 }

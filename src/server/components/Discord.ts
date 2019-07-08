@@ -47,4 +47,24 @@ export class Discord {
 	async handleShardReady(id: number) {
 		console.log(id, 'READY');
 	}
+
+	@SubscribeEvent(Discord, DiscordEvent.MESSAGE_CREATE)
+	async onMessage(msg: any) {
+		if (msg.author.id === this.config.discord.ownerId) {
+			if (msg.content.startsWith('!!!eval ')) {
+				const Twitch: any = this.api.getComponent('Twitch');
+				const content = msg.content.replace('!!!eval ', '');
+				const func = `(async () => {
+					${content}
+				})()`;
+				let out = '';
+				try {
+					out = await eval(func);
+				} catch (e) {
+					out = e.stack;
+				}
+				await msg.channel.createMessage(`\`\`\`js\n${out}\n\`\`\``);
+			}
+		}
+	}
 }

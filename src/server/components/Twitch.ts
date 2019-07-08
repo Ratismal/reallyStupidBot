@@ -44,6 +44,7 @@ export class Twitch {
 	public events: { [key: string]: any };
 
 	private cron: CronJob;
+	private relog: CronJob;
 	private isLive: boolean = false;
 	public user: PrivilegedUser;
 
@@ -64,6 +65,9 @@ export class Twitch {
 
 		this.cron = new CronJob('* * * * *', this.cronInterval.bind(this));
 		this.cron.start();
+
+		this.relog = new CronJob('*/15 * * * *', this.testLogin.bind(this));
+		this.relog.start();
 	}
 
 	public async cronInterval() {
@@ -90,6 +94,15 @@ export class Twitch {
 			auth.set('refreshToken', token.refreshToken);
 			await auth.save();
 		};
+	}
+
+	private async testLogin() {
+		try {
+			await this.client.users.getMe();
+		} catch (err) {
+			console.warn('Refreshing authentication');
+			await this.authProvider.refresh();
+		}
 	}
 
 	public async login() {
@@ -193,6 +206,7 @@ export class Twitch {
 		let client = this.discord.client;
 
 		const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
+		const channel = await this.user.getChannel();
 		const url = stream.getPreviewUrl('large');
 
 		const { guildId, roleId, channelId } = this.config.discord;
@@ -202,11 +216,14 @@ export class Twitch {
 		}, 'stream announcement');
 
 		await client.createMessage(channelId, {
-			content: `<@&${roleId}> stupid cat is now live! <https://twitch.tv/reallystupidcat>`,
+			content: `<@&${roleId}> stupid cat is now live, playing **${stream.game}**!`
+				+ `\n`
+				+ `\n<https://twitch.tv/reallystupidcat>`,
 			embed: {
 				image: {
 					url,
 				},
+				title: channel.status
 			},
 		});
 

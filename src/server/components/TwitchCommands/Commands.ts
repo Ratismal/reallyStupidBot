@@ -97,6 +97,8 @@ export class TwitchCommands {
 				content: message,
 				msg,
 				client: this.Twitch.chatClient,
+				twitch: this.Twitch.client,
+				Twitch: this.Twitch,
 				text,
 				args,
 			};
@@ -106,9 +108,11 @@ export class TwitchCommands {
 			const c = this.commands.get(command);
 
 			try {
-				const res: void | string = await c.execute(ctx);
-				if (typeof res === 'string') {
-					await ctx.client.say(ctx.channel, res);
+				if (c.validate && await c.validate(ctx)) {
+					const res: void | string = await c.execute(ctx);
+					if (typeof res === 'string') {
+						await ctx.client.say(ctx.channel, res);
+					}
 				}
 			} catch (err) {
 				console.error(err);
