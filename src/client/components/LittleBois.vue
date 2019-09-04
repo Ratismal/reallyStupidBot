@@ -246,7 +246,7 @@ export default {
 			],
 			vy: 5,
 			eventInterval: null,
-			seasons: ['spring', 'winter'],
+			seasons: ['spring'],
 			season: null,
 		};
 	},
