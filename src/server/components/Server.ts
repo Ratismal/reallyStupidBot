@@ -125,6 +125,7 @@ export class Server {
 		this.api.forwardEvents(this.eventHandler, Object.values(WSEvent));
 
 		this.app.listen(3005);
+		console.init('Listening on port 3005');
 	}
 
 	async wsBroadcast(msg: any) {

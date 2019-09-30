@@ -1,23 +1,23 @@
 <template>
 	<div>
-		<little-boi-sprite :cache="true"/>
+		<little-boi-sprite :cache="true" />
 
 		<div :class="['littleboi-wrapper','catflex', season]">
-			<div v-for="user in users" :key="user.name" :style="user.style" class='littleboi'>
-				<div class='message-wrapper catflex around'>
-					<div :class="user.messageClass">
-						{{user.message}}
-					</div>
+			<div v-for="user in users" :key="user.name" :style="user.style" class="littleboi">
+				<div class="message-wrapper catflex around">
+					<div
+						v-for="message in user.messages"
+						:key="message.key"
+						:class="message.class"
+					>{{message.message}}</div>
 				</div>
-				<little-boi-sprite :state="user.state" :style="`filter: url(#lb-${user.name})`"/>
+				<little-boi-sprite :state="user.state" :style="`filter: url(#lb-${user.name})`" />
 				<svg>
 					<filter :id="`lb-${user.name}`">
-						<feColorMatrix type="matrix"
-							:values="user.matrix"/>
+						<feColorMatrix type="matrix" :values="user.matrix" />
 					</filter>
 				</svg>
 			</div>
-
 		</div>
 	</div>
 </template>
@@ -54,16 +54,45 @@ class User {
 		this.messageHidden = true;
 
 		this.messages = [];
+		this.queue = [];
 		this.messageTimeout = null;
 
 		this.leavePromise = null;
 		this.leaveRej = null;
 
+		this.i = 0;
+
 		this.state = 'IDLE';
 	}
 
-	addMessage(message) {
-		this.messages.push(message);
+	async queueMessage(m) {}
+
+	async addMessage(message) {
+		let c = {
+			message: true,
+			hidden: true,
+			disabled: true,
+		};
+		let res;
+		let p = new Promise(r => (res = r));
+		let m = {
+			key: ++this.i,
+			message,
+			class: c,
+			res,
+		};
+		this.messages.push(m);
+		await p;
+		m.res = null;
+		c.disabled = false;
+		await this.sleep(5);
+		c.hidden = false;
+		await this.sleep(5000);
+		c.hidden = true;
+		await this.sleep(1000);
+		console.log(this.messages);
+		// this.messages.shift();
+		this.messages.splice(this.messages.indexOf(m), 1);
 	}
 
 	leave() {
@@ -204,16 +233,22 @@ class User {
 			}
 		}
 
-		if (this.messages.length > 0 && !this.messageTimeout) {
-			this.message = this.messages.shift();
-			this.messageHidden = false;
-			this.messageTimeout = setTimeout(async () => {
-				this.messageHidden = true;
-				await this.sleep(1000);
-				this.message = '';
-				this.messageTimeout = null;
-			}, 5000);
+		if (this.messages.length > 0) {
+			for (const m of this.messages.slice(0, 3)) {
+				if (m.res) m.res();
+			}
 		}
+
+		// if (this.messages.length > 0 && !this.messageTimeout) {
+		// 	this.message = this.messages.shift();
+		// 	this.messageHidden = false;
+		// 	this.messageTimeout = setTimeout(async () => {
+		// 		this.messageHidden = true;
+		// 		await this.sleep(1000);
+		// 		this.message = '';
+		// 		this.messageTimeout = null;
+		// 	}, 5000);
+		// }
 	}
 
 	randInt(min, max) {
@@ -246,7 +281,7 @@ export default {
 			],
 			vy: 5,
 			eventInterval: null,
-			seasons: ['spring'],
+			seasons: ['fall'],
 			season: null,
 		};
 	},
@@ -340,6 +375,9 @@ export default {
   &.spring {
     background-image: url("/img/littleboi/back-spring.png");
   }
+  &.fall {
+    background-image: url("/img/littleboi/back-fall.gif");
+  }
   &.winter {
     background-image: url("/img/littleboi/back-winter.png");
   }
@@ -356,40 +394,43 @@ export default {
 
 .message-wrapper {
   position: absolute;
-  top: -40px;
+  bottom: 65px;
   left: -500px;
   right: -500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.message {
+  /* autoprefixer: off */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 .message {
   // max-width: 100px;
-  text-align: center;
-  display: block;
+  text-align: left;
+  max-width: 300px;
   color: black;
-  height: 20px;
+  max-height: 60px;
+  line-height: 20px;
+  overflow: hidden;
   background-image: url("/img/littleboi/bubble-background.png");
   background-repeat: repeat;
   background-size: 32px 32px;
   border: 2px solid black;
   text-overflow: ellipsis;
-  padding: 0.25rem 0.5rem;
+  padding: 0.2rem 0.5rem;
   transition: opacity 1s;
+  margin-top: 0.2rem;
 
   position: relative;
   border-radius: 0.4em;
-
-  &::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    width: 0;
-    height: 0;
-    border: 10px solid transparent;
-    border-top-color: black;
-    border-bottom: 0;
-    margin-left: -10px;
-    margin-bottom: -10px;
+  &.disabled {
+    display: none;
   }
   &.hidden {
     opacity: 0;
