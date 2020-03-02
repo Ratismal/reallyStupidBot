@@ -211,9 +211,9 @@ export class Twitch {
 
 		const { guildId, roleId, channelId } = this.config.discord;
 
-		await client.editRole(guildId, roleId, {
-			mentionable: true,
-		}, 'stream announcement');
+		// await client.editRole(guildId, roleId, {
+		// 	mentionable: true,
+		// }, 'stream announcement');
 
 		await client.createMessage(channelId, {
 			content: `<@&${roleId}> stupid cat is now live, playing **${stream.game}**!`
@@ -221,9 +221,9 @@ export class Twitch {
 				+ `\nhttps://twitch.tv/reallystupidcat`,
 		});
 
-		await client.editRole(guildId, roleId, {
-			mentionable: false,
-		}, 'stream announcement');
+		// await client.editRole(guildId, roleId, {
+		// 	mentionable: false,
+		// }, 'stream announcement');
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_DOWN)
