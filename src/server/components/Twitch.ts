@@ -113,10 +113,10 @@ export class Twitch {
 				console.log(auth.dataValues);
 				this.authProvider = new RefreshableAuthProvider(
 					new StaticAuthProvider(this.config.twitch.clientId, auth.get('accessToken')), {
-						clientSecret: this.config.twitch.clientSecret,
-						refreshToken: auth.get('refreshToken'),
-						onRefresh: this.refresh(auth.id),
-					});
+					clientSecret: this.config.twitch.clientSecret,
+					refreshToken: auth.get('refreshToken'),
+					onRefresh: this.refresh(auth.id),
+				});
 				// create a client
 				this.client = new TwitchClient({
 					preAuth: true,
@@ -218,13 +218,7 @@ export class Twitch {
 		await client.createMessage(channelId, {
 			content: `<@&${roleId}> stupid cat is now live, playing **${stream.game}**!`
 				+ `\n`
-				+ `\n<https://twitch.tv/reallystupidcat>`,
-			embed: {
-				image: {
-					url,
-				},
-				title: channel.status
-			},
+				+ `\nhttps://twitch.tv/reallystupidcat`,
 		});
 
 		await client.editRole(guildId, roleId, {
