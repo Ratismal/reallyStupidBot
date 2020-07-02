@@ -29,7 +29,7 @@ export class Uptime implements Command {
 	public async execute(ctx: CommandContext) {
 		if (!this.startDate) {
 			let twitch = this.api.getComponent<Twitch>(Twitch);
-			const stream = await twitch.client.streams.getStreamByChannel(this.config.twitch.myId)
+			const stream = await twitch.client.helix.streams.getStreamByUserId(this.config.twitch.myId)
 			if (!stream) {
 				return 'The stream is offline right now.';
 			}
@@ -37,7 +37,7 @@ export class Uptime implements Command {
 		}
 
 		let diff = moment.duration(Date.now() - this.startDate);
-		return `The stream has been live for ${diff.hours()}:${diff.minutes()}:${diff.seconds()}.`;
+		return `The stream has been live for ${diff.hours()}:${diff.minutes().toString().padStart(2, '0')}:${diff.seconds().toString().padStart(2, '0')}.`;
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_UP)

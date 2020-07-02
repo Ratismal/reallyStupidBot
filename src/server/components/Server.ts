@@ -176,7 +176,7 @@ export class Server {
 		console.log(res.body);
 
 		const client = TwitchClient.withCredentials(this.config.twitch.clientId, res.body.access_token);
-		const user = await client.users.getMe();
+		const user = await client.helix.users.getMe();
 
 		await this.db.auth.upsert({
 			id: user.id,

@@ -23,7 +23,7 @@ export class ShoutOut implements Command {
 	}
 
 	public async execute(ctx: CommandContext) {
-		let user = await ctx.twitch.users.getUserByName(ctx.args[0]);
+		let user = await ctx.twitch.kraken.users.getUserByName(ctx.args[0]);
 		if (user) {
 			let channel = await user.getChannel();
 			return `If you like ${channel.game}, you should check out ${user.displayName}! https://twitch.tv/${user.name}`;

@@ -27,6 +27,8 @@ export default {
 						'channel_subscriptions',
 						'user_read',
 						'user_subscriptions',
+						'chat:read',
+						'chat:edit',
 					].join(' ')
 				);
 				window.location.href =

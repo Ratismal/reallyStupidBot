@@ -1,10 +1,10 @@
 import TwitchClient, {
 	AccessToken,
-	PrivilegedUser,
+	HelixUser,
 	StaticAuthProvider,
 	RefreshableAuthProvider,
 } from 'twitch';
-import ChatClient from 'twitch-chat-client';
+import ChatClient, { PrivateMessage } from 'twitch-chat-client';
 import { Database } from '$plugins';
 import { TwitchChatEvent } from '$server';
 import {
@@ -23,8 +23,13 @@ import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import { Discord } from './Discord';
 
-// import { EventEmitter } from 'events';
 const console = Loggr.get('Twitch');
+
+const EVENT_MAP = {
+	STREAM_DOWN: '🚮 **Stream Down**',
+	USER_JOIN: '📥 **User Joined**',
+	USER_PART: '📤 **User Parted**'
+}
 
 export class Twitch {
 	public api: ComponentAPI;
@@ -47,7 +52,8 @@ export class Twitch {
 	private cron: CronJob;
 	private relog: CronJob;
 	private isLive: boolean = false;
-	public user: PrivilegedUser;
+	private avatarCache: { [key: string]: string };
+	public user: HelixUser;
 
 	@Inject(Discord)
 	public discord: Discord;
@@ -68,11 +74,12 @@ export class Twitch {
 
 		this.relog = new CronJob('*/15 * * * *', this.testLogin.bind(this));
 		this.relog.start();
+
+		this.avatarCache = {};
 	}
 
 	public async cronInterval() {
 		const live = await this.isStreamLive();
-		// console.log('Ping! Stream is', live ? 'online' : 'offline', '. It was', this.isLive ? 'online' : 'offline');
 		if (live === null) return;
 		if (live && !this.isLive) {
 			this.isLive = true;
@@ -98,7 +105,7 @@ export class Twitch {
 
 	private async testLogin() {
 		try {
-			await this.client.users.getMe();
+			await this.client.helix.users.getMe();
 		} catch (err) {
 			console.warn('Refreshing authentication');
 			await this.authProvider.refresh();
@@ -118,41 +125,38 @@ export class Twitch {
 					onRefresh: this.refresh(auth.id),
 				});
 				// create a client
-				this.client = new TwitchClient({
-					preAuth: true,
-					authProvider: this.authProvider,
+				this.client = TwitchClient.withCredentials(this.config.twitch.clientId, auth.get('accessToken'), undefined, {
+					refreshToken: auth.get('refreshToken'),
+					clientSecret: this.config.twitch.clientSecret,
+					onRefresh: this.refresh(auth.id)
 				});
 
 				console.init('Testing login...');
 				let user;
 				// test login
 				try {
-					user = await this.client.users.getMe();
+					user = await this.client.helix.users.getMe();
 				} catch (err) {
 					await this.authProvider.refresh();
 					console.warn('Failed. Trying again...');
-					user = await this.client.users.getMe();
+					user = await this.client.helix.users.getMe();
 				}
 				this.user = user;
 				console.init('Logged in as', user.displayName);
 
 				console.init('Loading chat...');
-				this.chatClient = new ChatClient('reallystupidbot', this.config.twitch.chatToken, this.client);
+				this.chatClient = new ChatClient(this.client, {
+					channels: [user.displayName],
+					requestMembershipEvents: true
+				});
 				console.init('Loading events...');
 				await this.registerEvents();
 
-				// this.api.forwardEvents(this.cclient, Object.values(this.events));
 				console.init('Connecting...');
 				await this.chatClient.connect();
-				console.init('Waiting for registration...');
-				await this.chatClient.waitForRegistration();
-				console.init('Joining channel...');
-				await this.chatClient.join(user.displayName);
 
 				// First ping, don't perform announcement
-				if (await this.isStreamLive()) {
-					this.isLive = true;
-				} else this.isLive = false;
+				this.isLive = await this.isStreamLive();
 			} else {
 				console.error('No authentication was found.');
 			}
@@ -188,11 +192,8 @@ export class Twitch {
 
 	public async isStreamLive() {
 		if (this.client) {
-			const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
-			// console.log(stream);
-			// if (stream !== null)
-			// 	this.eventHandler.emit('STREAM_UP');
-
+			const user = await this.client.helix.users.getUserById(this.config.twitch.myId);
+			const stream = await user.getStream();
 			return stream !== null;
 		} else return null;
 	}
@@ -205,32 +206,75 @@ export class Twitch {
 
 		let client = this.discord.client;
 
-		const stream = await this.client.streams.getStreamByChannel(this.config.twitch.myId);
-		const channel = await this.user.getChannel();
-		const url = stream.getPreviewUrl('large');
+		const user = await this.client.helix.users.getUserById(this.config.twitch.myId);
+		const stream = await user.getStream();
+		const game = await stream.getGame();
 
-		const { guildId, roleId, channelId } = this.config.discord;
+		const { roleId, channelId } = this.config.discord;
 
-		// await client.editRole(guildId, roleId, {
-		// 	mentionable: true,
-		// }, 'stream announcement');
+		// wait 5 minutes to give twitch time to (hopefully) generate a preview
+		setTimeout(async () => {
+			await client.createMessage(channelId, {
+				content: `<@&${roleId}> stupid cat is now live!`,
+				embed: {
+					title: stream.title,
+					description: `We're doin' some **${game.name}**, come join us!\n\n<https://twitch.tv/${user.name}>`,
+					image: {
+						url: this.formatThumbnail(stream.thumbnailUrl, 1280, 720)
+					},
+					thumbnail: {
+						url: this.formatThumbnail(game.boxArtUrl, 300, 300)
+					}
+				}
+			});
+		}, 5 * 60 * 1000);
+	}
 
-		await client.createMessage(channelId, {
-			content: `<@&${roleId}> stupid cat is now live, playing **${stream.game}**!`
-				+ `\n`
-				+ `\nhttps://twitch.tv/reallystupidcat`,
-		});
-
-		// await client.editRole(guildId, roleId, {
-		// 	mentionable: false,
-		// }, 'stream announcement');
+	formatThumbnail(url: string, width: number, height: number) {
+		return url.replace('{width}', width.toString()).replace('{height}', height.toString());
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.STREAM_DOWN)
 	async handleStreamDown() {
 		console.info('Stream is no longer live.');
 		console.log(this.user.displayName);
-		await this.chatClient.say('#' + this.user.name, `${this.user.displayName} is now offline!`);
+		this.chatClient.say('#' + this.user.name, `${this.user.displayName} is now offline!`);
+		await this.logEvent(EVENT_MAP.STREAM_DOWN);
 	}
 
+	async logEvent(event: string, args: object = {}) {
+		let client = this.discord.client;
+		await client.createMessage(this.config.discord.eventChannelId, {
+			content: `${event}\n` + Object.entries(args).map(entry => ` - ${entry[0]}: ${entry[1]}`).join('\n')
+		});
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.JOIN)
+	async handleJoin(channel: string, user: string) {
+		await this.logEvent(EVENT_MAP.USER_JOIN, { user });
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.PART)
+	async handlePart(channel: string, user: string) {
+		await this.logEvent(EVENT_MAP.USER_PART, { user });
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.PRIVMSG)
+	private async handleMessage(channel: string, user: string, message: string, msg: PrivateMessage) {
+		let client = this.discord.client;
+
+		let avatar = this.avatarCache[user];
+		if (!avatar) {
+			const tUser = await this.client.helix.users.getUserByName(user);
+			avatar = tUser.profilePictureUrl;
+			this.avatarCache[user] = avatar;
+		}
+
+		const webhook = this.config.discord.chatWebhook;
+		client.executeWebhook(webhook.id, webhook.token, {
+			content: message,
+			username: msg.userInfo.userName,
+			avatarURL: avatar
+		});
+	}
 }
