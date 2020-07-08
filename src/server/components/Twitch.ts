@@ -4,7 +4,7 @@ import TwitchClient, {
 	StaticAuthProvider,
 	RefreshableAuthProvider,
 } from 'twitch';
-import ChatClient, { PrivateMessage } from 'twitch-chat-client';
+import ChatClient, { PrivateMessage, ChatRitualInfo } from 'twitch-chat-client';
 import { Database } from '$plugins';
 import { TwitchChatEvent } from '$server';
 import {
@@ -22,13 +22,15 @@ import { EventEmitter } from 'events';
 
 import { CronJob } from 'cron';
 import { Discord } from './Discord';
+import UserNotice from 'twitch-chat-client/lib/Capabilities/TwitchCommandsCapability/MessageTypes/UserNotice';
 
 const console = Loggr.get('Twitch');
 
 const EVENT_MAP = {
 	STREAM_DOWN: '🚮 **Stream Down**',
 	USER_JOIN: '📥 **User Joined**',
-	USER_PART: '📤 **User Parted**'
+	USER_PART: '📤 **User Parted**',
+	RITUAL: '🃏 **Ritual**'
 }
 
 export class Twitch {
@@ -143,6 +145,10 @@ export class Twitch {
 				}
 				this.user = user;
 				console.init('Logged in as', user.displayName);
+
+				if (this.chatClient) {
+					this.chatClient.quit();
+				}
 
 				console.init('Loading chat...');
 				this.chatClient = new ChatClient(this.client, {
@@ -276,5 +282,11 @@ export class Twitch {
 			username: msg.userInfo.userName,
 			avatarURL: avatar
 		});
+	}
+
+	@SubscribeEvent(Twitch, TwitchChatEvent.RITUAL)
+	private async handleRitual(channel: string, user: string, ritualInfo: ChatRitualInfo, msg: UserNotice) {
+		await this.logEvent(EVENT_MAP.USER_PART, { user, ...ritualInfo });
+
 	}
 }

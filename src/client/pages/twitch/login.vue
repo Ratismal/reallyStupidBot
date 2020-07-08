@@ -25,6 +25,7 @@ export default {
 						'channel_feed_edit',
 						'channel_feed_read',
 						'channel_subscriptions',
+						'channel:read:redemptions',
 						'user_read',
 						'user_subscriptions',
 						'chat:read',
