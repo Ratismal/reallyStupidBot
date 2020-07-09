@@ -5,6 +5,7 @@ import TwitchClient, {
 	RefreshableAuthProvider,
 } from 'twitch';
 import ChatClient, { PrivateMessage, ChatRitualInfo } from 'twitch-chat-client';
+import PubSubClient, { PubSubListener, PubSubRedemptionMessage, PubSubBitsMessage, PubSubSubscriptionMessage } from 'twitch-pubsub-client';
 import { Database } from '$plugins';
 import { TwitchChatEvent } from '$server';
 import {
@@ -23,6 +24,7 @@ import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import { Discord } from './Discord';
 import UserNotice from 'twitch-chat-client/lib/Capabilities/TwitchCommandsCapability/MessageTypes/UserNotice';
+import { PubSubEvent } from '../Constants';
 
 const console = Loggr.get('Twitch');
 
@@ -30,7 +32,9 @@ const EVENT_MAP = {
 	STREAM_DOWN: '🚮 **Stream Down**',
 	USER_JOIN: '📥 **User Joined**',
 	USER_PART: '📤 **User Parted**',
-	RITUAL: '🃏 **Ritual**'
+	RITUAL: '🃏 **Ritual**',
+	REDEMPTION: '💮 **Redemption**',
+	BITS: '✨ **Bits**',
 }
 
 export class Twitch {
@@ -46,6 +50,7 @@ export class Twitch {
 	private config: { [key: string]: any };
 
 	public chatClient: ChatClient;
+	public pubSubClient: PubSubClient;
 	public client: TwitchClient;
 	private eventHandler: EventEmitter;
 
@@ -55,6 +60,9 @@ export class Twitch {
 	private relog: CronJob;
 	private isLive: boolean = false;
 	private avatarCache: { [key: string]: string };
+
+	private pubSubListeners: PubSubListener[] = [];
+
 	public user: HelixUser;
 
 	@Inject(Discord)
@@ -155,6 +163,12 @@ export class Twitch {
 					channels: [user.displayName],
 					requestMembershipEvents: true
 				});
+
+				console.init('Loading pubsub...');
+				this.pubSubClient = new PubSubClient();
+				this.pubSubClient.registerUserListener(this.client, this.user.id);
+				this.registerPubSubListeners();
+
 				console.init('Loading events...');
 				await this.registerEvents();
 
@@ -188,6 +202,19 @@ export class Twitch {
 					// console.init('Registered twitch event', eventName);
 				}
 			}
+		}
+	}
+
+	private async registerPubSubListeners() {
+		for (const listener of this.pubSubListeners) {
+			listener.remove();
+		}
+
+		for (const key in PubSubEvent) {
+			const eventFunc: string = (PubSubEvent as any)[key];
+			(this.pubSubClient as any)[eventFunc](this.user.id, (...args: any) => {
+				this.eventHandler.emit(eventFunc, ...args);
+			});
 		}
 	}
 
@@ -287,6 +314,35 @@ export class Twitch {
 	@SubscribeEvent(Twitch, TwitchChatEvent.RITUAL)
 	private async handleRitual(channel: string, user: string, ritualInfo: ChatRitualInfo, msg: UserNotice) {
 		await this.logEvent(EVENT_MAP.USER_PART, { user, ...ritualInfo });
+	}
 
+	@SubscribeEvent(Twitch, PubSubEvent.REDEMPTION)
+	private async handleRedemption(message: PubSubRedemptionMessage) {
+		await this.logEvent(EVENT_MAP.REDEMPTION, {
+			user: message.userDisplayName,
+			reward: message.rewardName,
+			cost: message.rewardCost,
+			prompt: message.rewardPrompt,
+			message: message.message
+		});
+	}
+
+	@SubscribeEvent(Twitch, PubSubEvent.BITS)
+	private async handleBits(message: PubSubBitsMessage) {
+		await this.logEvent(EVENT_MAP.BITS, {
+			user: message.userName,
+			bits: message.bits,
+			total: message.totalBits,
+		});
+	}
+
+	@SubscribeEvent(Twitch, PubSubEvent.SUBSCRIPTION)
+	private async handleSub(message: PubSubSubscriptionMessage) {
+		await this.logEvent(EVENT_MAP.BITS, {
+			user: message.userDisplayName,
+			gifter: message.gifterDisplayName,
+			months: message.months,
+			streak: message.streakMonths,
+		});
 	}
 }

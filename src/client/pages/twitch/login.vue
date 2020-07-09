@@ -17,6 +17,7 @@ export default {
 					[
 						'bits:read',
 						'channel:read:subscriptions',
+						'channel:read:redemptions',
 						'user:edit',
 						'user:edit:broadcast',
 						'user:read:broadcast',
@@ -25,7 +26,6 @@ export default {
 						'channel_feed_edit',
 						'channel_feed_read',
 						'channel_subscriptions',
-						'channel:read:redemptions',
 						'user_read',
 						'user_subscriptions',
 						'chat:read',

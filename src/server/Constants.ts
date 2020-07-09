@@ -49,6 +49,16 @@ export enum TwitchChatEvent {
 	STREAM_DOWN = 'STREAM_DOWN',
 }
 
+// Comment out the events that aren't desired
+export enum PubSubEvent {
+	BITS = 'onBits',
+	// BITS_BADGE_UNLOCK = 'onBitsBadgeUnlock',
+	// MOD_ACTION = 'onModAction',
+	REDEMPTION = 'onRedemption',
+	SUBSCRIPTION = 'onSubscription',
+	// WHISPER = 'onWhisper',
+}
+
 export enum WSEvent {
 	AUTH = 'AUTH',
 	PONG = 'PONG',
