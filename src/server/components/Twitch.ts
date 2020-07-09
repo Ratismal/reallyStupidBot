@@ -213,7 +213,9 @@ export class Twitch {
 
 		for (const key in PubSubEvent) {
 			const eventFunc: string = (PubSubEvent as any)[key];
+			console.init('Registering', eventFunc, 'listener...');
 			(this.pubSubClient as any)[eventFunc](this.user.id, (...args: any) => {
+				console.info('PubSubEvent has been triggered:', eventFunc)
 				this.eventHandler.emit(eventFunc, ...args);
 			});
 		}
