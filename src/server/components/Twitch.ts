@@ -166,7 +166,7 @@ export class Twitch {
 
 				console.init('Loading pubsub...');
 				this.pubSubClient = new PubSubClient();
-				this.pubSubClient.registerUserListener(this.client, this.user.id);
+				await this.pubSubClient.registerUserListener(this.client);
 				this.registerPubSubListeners();
 
 				console.init('Loading events...');
@@ -195,9 +195,10 @@ export class Twitch {
 					// SNAKE_CASE event names
 					eventName = eventName.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
 					this.events[eventName] = (this.chatClient as any)[key];
-					const handler = (this.chatClient as any)[key]((...args: any[]) => {
+					const listener: PubSubListener = (this.chatClient as any)[key]((...args: any[]) => {
 						this.eventHandler.emit(eventName, ...args);
 					});
+					this.pubSubListeners.push(listener);
 					// this.eventHandler.on(eventName);
 					// console.init('Registered twitch event', eventName);
 				}
