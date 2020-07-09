@@ -52,6 +52,7 @@ export class Twitch {
 	public chatClient: ChatClient;
 	public pubSubClient: PubSubClient;
 	public client: TwitchClient;
+	public clientForChat: TwitchClient;
 	private eventHandler: EventEmitter;
 
 	public events: { [key: string]: any };
@@ -143,6 +144,7 @@ export class Twitch {
 					clientSecret: this.config.twitch.clientSecret,
 					onRefresh: this.refresh(auth.id)
 				});
+				this.clientForChat = TwitchClient.withCredentials(this.config.twitch.clientId, this.config.twitch.chatToken);
 
 				console.init('Testing login...');
 				let user;
@@ -162,7 +164,7 @@ export class Twitch {
 				}
 
 				console.init('Loading chat...');
-				this.chatClient = new ChatClient(this.client, {
+				this.chatClient = new ChatClient(this.clientForChat, {
 					channels: [user.displayName],
 					requestMembershipEvents: true
 				});
