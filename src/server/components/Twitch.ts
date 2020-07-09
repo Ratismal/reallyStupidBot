@@ -75,7 +75,10 @@ export class Twitch {
 
 		this.eventHandler = new EventEmitter();
 
-		this.api.forwardEvents(this.eventHandler, Object.values(TwitchChatEvent));
+		this.api.forwardEvents(this.eventHandler, [
+			...Object.values(TwitchChatEvent),
+			...Object.values(PubSubEvent)
+		]);
 
 		await this.login();
 
@@ -195,10 +198,9 @@ export class Twitch {
 					// SNAKE_CASE event names
 					eventName = eventName.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
 					this.events[eventName] = (this.chatClient as any)[key];
-					const listener: PubSubListener = (this.chatClient as any)[key]((...args: any[]) => {
+					const handler = (this.chatClient as any)[key]((...args: any[]) => {
 						this.eventHandler.emit(eventName, ...args);
 					});
-					this.pubSubListeners.push(listener);
 					// this.eventHandler.on(eventName);
 					// console.init('Registered twitch event', eventName);
 				}
@@ -214,10 +216,11 @@ export class Twitch {
 		for (const key in PubSubEvent) {
 			const eventFunc: string = (PubSubEvent as any)[key];
 			console.init('Registering', eventFunc, 'listener...');
-			(this.pubSubClient as any)[eventFunc](this.user.id, (...args: any) => {
-				console.info('PubSubEvent has been triggered:', eventFunc)
+			const listener: PubSubListener = (this.pubSubClient as any)[eventFunc](this.user.id, (...args: any) => {
+				console.info('PubSubEvent has been triggered:', eventFunc, args);
 				this.eventHandler.emit(eventFunc, ...args);
 			});
+			this.pubSubListeners.push(listener);
 		}
 	}
 
