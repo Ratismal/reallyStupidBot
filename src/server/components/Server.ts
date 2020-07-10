@@ -128,6 +128,7 @@ export class Server {
 		console.init('Listening on port 3005');
 	}
 
+	@SubscribeEvent(Twitch, WSEvent.SEND_MESSAGE)
 	async wsBroadcast(msg: any) {
 		for (const ws of this.connections) {
 			ws.sendMessage(msg);

@@ -62,4 +62,5 @@ export enum PubSubEvent {
 export enum WSEvent {
 	AUTH = 'AUTH',
 	PONG = 'PONG',
+	SEND_MESSAGE = 'SEND_MESSAGE'
 }

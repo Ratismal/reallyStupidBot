@@ -24,7 +24,8 @@ import { EventEmitter } from 'events';
 import { CronJob } from 'cron';
 import { Discord } from './Discord';
 import UserNotice from 'twitch-chat-client/lib/Capabilities/TwitchCommandsCapability/MessageTypes/UserNotice';
-import { PubSubEvent } from '../Constants';
+import { PubSubEvent, WSEvent } from '../Constants';
+import TwitchPrivateMessage from 'twitch-chat-client/lib/StandardCommands/TwitchPrivateMessage';
 
 const console = Loggr.get('Twitch');
 
@@ -78,7 +79,8 @@ export class Twitch {
 
 		this.api.forwardEvents(this.eventHandler, [
 			...Object.values(TwitchChatEvent),
-			...Object.values(PubSubEvent)
+			...Object.values(PubSubEvent),
+			...Object.values(WSEvent)
 		]);
 
 		await this.login();
@@ -203,8 +205,6 @@ export class Twitch {
 					const handler = (this.chatClient as any)[key]((...args: any[]) => {
 						this.eventHandler.emit(eventName, ...args);
 					});
-					// this.eventHandler.on(eventName);
-					// console.init('Registered twitch event', eventName);
 				}
 			}
 		}
@@ -219,7 +219,6 @@ export class Twitch {
 			const eventFunc: string = (PubSubEvent as any)[key];
 			console.init('Registering', eventFunc, 'listener...');
 			const listener: PubSubListener = (this.pubSubClient as any)[eventFunc](this.user.id, (...args: any) => {
-				console.info('PubSubEvent has been triggered:', eventFunc, args);
 				this.eventHandler.emit(eventFunc, ...args);
 			});
 			this.pubSubListeners.push(listener);
@@ -301,7 +300,8 @@ export class Twitch {
 	}
 
 	@SubscribeEvent(Twitch, TwitchChatEvent.PRIVMSG)
-	private async handleMessage(channel: string, user: string, message: string, msg: PrivateMessage) {
+	private async handleMessage(channel: string, user: string, message: string, msg: TwitchPrivateMessage) {
+		console.log(msg);
 		let client = this.discord.client;
 
 		let avatar = this.avatarCache[user];
@@ -352,5 +352,13 @@ export class Twitch {
 			months: message.months,
 			streak: message.streakMonths,
 		});
+	}
+
+	public playAudio(category: string, name: string) {
+		this.eventHandler.emit(WSEvent.SEND_MESSAGE, {
+			code: 'PLAY_AUDIO',
+			category: category,
+			name: name,
+		})
 	}
 }

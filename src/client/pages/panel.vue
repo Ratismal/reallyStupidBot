@@ -2,15 +2,17 @@
 	<main class='container'>
 		<user-greeter class='user-greeter' v-if="!elements.greeter.hide" :style="elements.greeter.style"/>
 		<little-bois class='littlebois' v-if="!elements.littlebois.hide" :style="elements.littlebois.style"/>
+		<audio-bus/>
 	</main>
 </template>
 
 <script>
 import UserGreeter from '~/components/UserGreeter.vue';
 import LittleBois from '~/components/LittleBois.vue';
+import AudioBus from '~/components/AudioBus.vue';
 
 export default {
-	components: { UserGreeter, LittleBois },
+	components: { UserGreeter, LittleBois, AudioBus },
 	layout: 'custom',
 	data() {
 		return {

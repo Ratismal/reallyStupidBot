@@ -1,0 +1,13 @@
+{
+	"navi": {
+		"hello": "navi/hello.ogg",
+		"hey": "navi/hey.ogg",
+		"listen": "navi/listen.ogg",
+		"look": "navi/look.ogg",
+		"scream": "navi/scream.ogg",
+		"watch out": "navi/watch_out.ogg"
+	},
+	"redemption": {
+		"default": "generic/redemption.ogg"
+	}
+}
