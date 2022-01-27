@@ -8,7 +8,7 @@ const console = Loggr.get('TR: Echo');
 
 export class Dab implements Redemption {
 	public api: ComponentAPI;
-	public name: string = 'echo';
+	public name: string = 'read';
 	public playSound = true;
 
 	public parent: Component = TwitchRedemptions;
