@@ -3,6 +3,7 @@ const config = require('./config.json');
 module.exports = {
 	head: { title: 'Really Stupid Bot' }, // Headers of the page
 	srcDir: 'src/client',
+	telemetry: false,
 	build: {
 		extend(config, { isDev, isClient }) {
 			if (isDev && isClient) {

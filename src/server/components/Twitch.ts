@@ -362,10 +362,10 @@ export class Twitch {
 		})
 	}
 
-	public readText(text: string) {
+	public playAudioFile(urls: string[]) {
 		this.eventHandler.emit(WSEvent.SEND_MESSAGE, {
-			code: 'READ_TEXT',
-			text,
+			code: 'PLAY_AUDIO_FILE',
+			urls,
 		})
 	}
 }
