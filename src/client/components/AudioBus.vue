@@ -47,7 +47,7 @@ export default {
 			console.log(text);
 			const msg = new SpeechSynthesisUtterance();
 			msg.text = text;
-			window.speechSynthesis.speak(text);
+			window.speechSynthesis.speak(msg);
 		},
 	},
 };
