@@ -29,16 +29,16 @@
   }
 
   .col {
-    @media #{$small-screen} {
-      @include column('s');
-    }
+    // @media #{$small-screen} {
+    //   @include column('s');
+    // }
 
-    @media #{$medium-screen} {
-      @include column('m');
-    }
+    // @media #{$medium-screen} {
+    //   @include column('m');
+    // }
 
-    @media #{$large-screen} {
-      @include column('l');
-    }
+    // @media #{$large-screen} {
+    //   @include column('l');
+    // }
   }
 }
