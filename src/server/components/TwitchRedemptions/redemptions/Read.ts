@@ -4,9 +4,9 @@ import { TwitchRedemptions } from '../Redemptions';
 import { Redemption, RedemptionContext } from '../interfaces';
 
 import Loggr from '$loggr';
-const console = Loggr.get('TR: Echo');
+const console = Loggr.get('TR: Read');
 
-export class Dab implements Redemption {
+export class Read implements Redemption {
 	public api: ComponentAPI;
 	public name: string = 'read';
 	public playSound = true;
