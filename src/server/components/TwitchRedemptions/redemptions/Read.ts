@@ -14,6 +14,7 @@ export class Dab implements Redemption {
 	public parent: Component = TwitchRedemptions;
 
 	public async execute(ctx: RedemptionContext) {
+		console.log('aaaaaaa');
 		ctx.Twitch.readText(ctx.message.message);
 	}
 }
