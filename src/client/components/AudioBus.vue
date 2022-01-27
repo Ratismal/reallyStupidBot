@@ -24,6 +24,7 @@ export default {
 		}
 
 		this.$ws.on('PLAY_AUDIO', this.playSound.bind(this));
+		this.$ws.on('READ_TEXT', this.readText.bind(this));
 	},
 	beforeDestroy() {
 		this.$ws.removeListener('PLAY_AUDIO', this.playSound.bind(this));
@@ -41,6 +42,12 @@ export default {
 
 				audio.play();
 			}
+		},
+		readText({text}) {
+			console.log(text);
+			const msg = SpeechSynthesisUtterance();
+			msg.text = text;
+			window.speechSynthesis.speak(text);
 		},
 	},
 };

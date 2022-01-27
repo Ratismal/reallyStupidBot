@@ -361,4 +361,11 @@ export class Twitch {
 			name: name,
 		})
 	}
+
+	public readText(text: string) {
+		this.eventHandler.emit(WSEvent.SEND_MESSAGE, {
+			code: 'READ_TEXT',
+			text,
+		})
+	}
 }
