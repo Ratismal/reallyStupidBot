@@ -45,7 +45,7 @@ export default {
 		},
 		readText({text}) {
 			console.log(text);
-			const msg = SpeechSynthesisUtterance();
+			const msg = new SpeechSynthesisUtterance();
 			msg.text = text;
 			window.speechSynthesis.speak(text);
 		},
