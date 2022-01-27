@@ -11,6 +11,8 @@ export default {
 		return {
 			manifest,
 			audio: {},
+			files: [],
+			currentlyPlaying: false,
 		};
 	},
 	mounted() {
@@ -45,13 +47,23 @@ export default {
 			}
 		},
 		async playAudioFile({urls}) {
-			for (const url of urls) {
-				await new Promise(res => {
-					console.log(url);
-					const audio = new Audio(url);
-					audio.addEventListener('ended', res);
-					audio.play();
-				});
+			this.files.push(...urls, 'PAUSE');
+
+			if (!this.currentlyPlaying) {
+				this.currentlyPlaying = true;
+				while (this.files.length > 0) {
+					await new Promise(res => {
+						const url = this.files.shift();
+						if (url === 'PAUSE') {
+							return setTimeout(res, 3000);
+						}
+						console.log(url);
+						const audio = new Audio(url);
+						audio.addEventListener('ended', res);
+						audio.play();
+					});
+				}
+				this.currentlyPlaying = false;
 			}
 		},
 	},
