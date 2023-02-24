@@ -38,7 +38,7 @@
 		"nuxt": "^2.15.8",
 		"pg": "^8.7.1",
 		"sass": "^1.49.0",
-		"sequelize": "^4.43.0",
+		"sequelize": "^6.29.0",
 		"sequelize-cli": "^5.4.0",
 		"snekfetch": "^4.0.4",
 		"twitch": "^4.1.2",
